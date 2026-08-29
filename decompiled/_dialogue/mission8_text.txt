@@ -1,0 +1,32 @@
+Mission 8: 
+txtM8Z1_p1: It will be dark soon and the forest is not a safe place. I ordered the doors be closed.
+txtM8Z1_p2: I think you need a place to sleep for the night.
+txtM8Z1_p3: Come with me to the Fortress. We should be able to find you a room.
+txtM8Z1_p4: Before we go, I'd like to give this flower to the Healer.
+txtM8Z1_p5: Can you help me?
+txtM8Z2_p1: I closed the gate to make sure the village is safe during the night.
+txtM8Z3_p1: We've been ordered to let no one through.
+txtM8Z3_p2: Our guard duty is over.
+txtM8Z4_p1: We are waiting for Princess Sparkle. It will be dark soon and the forest is not a safe place. I ordered the doors be closed.
+txtM8Z4_p2: It's time to go home now.
+txtM8Z5_p1: Come meet me inside the fortress.
+txtM8Z6_p1: Everybody go home.
+txtM8Z7_p1: I'm happy that one of my kind has chosen to honor the people of Arachna, the Turandots.
+txtM8Z7_p2: Watch your Spider very carefully.
+txtM8Z7_p3: You are now bound together for life.
+txtM8Z8_p1: The night is coming and it has been a hard day. We need to rest.
+txtM8Z9_p1: It will be dark soon. Do you have a place to sleep?
+txtM8Z9_p2: I invite you inside the Fortress with the other Spider Riders.
+txtM8Z9_p3: Meet me in front of the doors to the town of Arachna.
+txtM8Z10_p1: Mom, did you see the spiders fight? They're unbelievable!
+txtM8Z11_p1: Thanks for giving me this flower. I can use it to heal my people.
+txtM8Z11_p2: You've done a lot for us since you come here. It must mean great things for you.
+txtM8Z11_p3: I believe the Oracle is guiding you along.
+txtM8Z11_p4: We are in a safe place, but it has been ruined by Buguese, leader of the Invectids.
+txtM8Z11_p5: He broke the statue containing the Oracle's spirit and scattered the pieces all over...
+txtM8Z11_p6: But they won't succeed!
+txtM8Z11_p7: The legend tells of a stranger coming here to save our people and defeat the forces of Mantid, the Invectid Leader.
+txtM8Z11_p8: I believe that day will soon come.
+txtM8Z12_p1: I have come to thank the Oracle for protecting us today.
+txtM8Z12_p2: I'm going home now to prepare a potion with this flower.
+txtM8Z13_p1: Welcome to the town of Arachna!

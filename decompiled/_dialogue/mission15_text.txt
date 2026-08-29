@@ -1,0 +1,32 @@
+Mission 15: 
+txtM15Z0_p1: Bonus level : To finish the game, find the cards scattered all over the town of Arachna.
+txtM15Z0_p2: We are gathered here to welcome a new recruit to our company.
+txtM15Z0_p3: You have shown your worth once again.
+txtM15Z0_p4: I am happy to welcome you among us.
+txtM15Z0_p5: Our enemies' words seem to say that the war is far from over.
+txtM15Z0_p6: We will need you and anyone else who has the courage to join us.
+txtM15Z0_p7: All for one and one for all, calling all Spider Riders!
+txtM15Z1_p1: Glory and honor to the heroes of Arachna!
+txtM15Z2_p1: Thanks to you, we are safe and sound.
+txtM15Z3_p1: You have completed the solo missions.
+txtM15Z3_p2: Come join us in the world of Arachna to continue the adventure.
+txtM15Z3_p3: See you soon, Spider Rider!
+txtM15Z4_p1: The armor isn't ready yet.
+txtM15Z4_p2: In the meantime, I finished this armor. It's yours in exchange for this loose change.
+txtM15Z5_p1: Thank you for doing what you do.
+txtM15Z6_p1: May the Oracle watch over you.
+txtM15Z7_p1: Everything is back to normal in the town.
+txtM15Z8_p1: The craftsman finished making my ring. How nice.
+txtM15Z8_p2: Oh, come to think of it... I also have a gift for you.
+txtM15Z8_p3: It's not much, but please take these.
+txtM15Z9_p1: Thank you for all that you've done for me.
+txtM15Z10_p1: Hello, noble Spider Rider. Thank you for protecting our houses.
+txtM15Z11_p1: Of course, I have something that may interest you.
+txtM15Z11_p2: I also know a woman who would like to express her thanks.
+txtM15Z11_p3: Since I need to bring her this ring, maybe you can take it to her yourself.
+txtM15Z12_p1: Thank you for protecting our houses.
+txtM15Z13_p1: Now that it's all over, I can go rest.
+txtM15Z14_p1: Congratulations!
+txtM15Z15_p1: You're one of us now.
+txtM15Z16_p1: It's wonderful.
+txtM15Z17_p1: The door is locked.

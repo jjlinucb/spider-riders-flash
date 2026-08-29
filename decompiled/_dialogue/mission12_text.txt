@@ -1,0 +1,43 @@
+Mission 12: 
+txtM12Z1_p1: I'll stay on my guard. The Invectids will no longer come through the town doors!
+txtM12Z1_p2: Here's another one!
+txtM12Z1_p3: They took me by surprise! I can't stop them!
+txtM12Z1_p4: Here's an another one!
+txtM12Z2_p1: I wonder why the rules force us to control access to the town.
+txtM12Z2_p2: It's very boring.
+txtM12Z2_p3: I think I heard something move in the bushes.
+txtM12Z2_p4: It's probably just the wind.
+txtM12Z3_p1: Today, I'm going to the village to visit my brother.
+txtM12Z3_p2: I heard they got a very close look at the Invectids.
+txtM12Z3_p3: I hear strange noises. I think we should alert the Spider Riders.
+txtM12Z4_p1: Help!
+txtM12Z5_p1: The door is unlocked.
+txtM12Z6_p1: I'm working on a new armor. Come see me later if you'd like to buy it.
+txtM12Z7_p1: Watch out!
+txtM12Z7_p2: I'm surrounded!
+txtM12Z7_p3: Here's comes the last one!
+txtM12Z8_p1: Here's another one!
+txtM12Z8_p2: I'm surrounded!
+txtM12Z8_p3: Here's another one!
+txtM12Z9_p1: There's a lot of work to do in the gardens. I'll tell the Fortress people.
+txtM12Z10_p1: Some of the Turandots are still missing.
+txtM12Z10_p2: You've completed Mission #12. Congratulations!
+txtM12Z10_p3: All the Turandots are inside the Fortress.
+txtM12Z10_p4: We can close the doors to protect the Turandots.
+txtM12Z11_p1: We need to relieve the guard at the town entrance. That old fool is sleeping on his spear.
+txtM12Z11_p2: Something's brewing. We need to warn Master Igneous.
+txtM12Z11_p3: Most of the townspeople are inside, but some of the Turandots are still in the streets!
+txtM12Z12_p1: What a great battle!
+txtM12Z12_p2: That signal! The Invectids must surely be attacking!
+txtM12Z12_p3: Venus and I will go patrol the town.
+txtM12Z13_p1: You fought a clean fight. I must admit the others were right.
+txtM12Z13_p2: You may be worthy of the title of Spider Rider.
+txtM12Z13_p3: I would be proud to accept you to our team.
+txtM12Z13_p4: Can you hear that noise? The town is under attack!
+txtM12Z13_p5: Hurry, the townspeople must head for cover inside the Fortress.
+txtM12Z14_p1: Find that woman, please!
+txtM12Z14_p2: A friend of mine is still inside her house. Take this key and go see if she was captured by those monsters.
+txtM12Z14_p3: Here's another one!
+txtM12Z14_p4: Save me!
+txtM12Z15_p1: I hope the Manacle you bought was useful.
+txtM12Z15_p2: Where does that noise come from?

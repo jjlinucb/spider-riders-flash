@@ -1,0 +1,12 @@
+outputTuto2 = root.getInsName("txtTutoMain2",root.parseKitBSystem);
+outputTuto3 = root.getInsName("txtTutoMain3",root.parseKitBSystem);
+outputTuto4 = root.getInsName("txtTutoMain4",root.parseKitBSystem);
+outputTuto5 = root.getInsName("txtTutoMain5",root.parseKitBSystem);
+outputTuto6 = root.getInsName("txtTutoMain6",root.parseKitBSystem);
+outputTuto7 = root.getInsName("txtTutoMain7",root.parseKitBSystem);
+outputTuto8 = root.getInsName("txtTutoMain8",root.parseKitBSystem);
+outputTuto9 = root.getInsName("txtTutoMain9",root.parseKitBSystem);
+outputTuto10 = root.getInsName("txtTutoMain10",root.parseKitBSystem);
+outputTuto11 = root.getInsName("txtTutoMain11",root.parseKitBSystem);
+outputTuto12 = root.getInsName("txtTutoMain12",root.parseKitBSystem);
+stop();

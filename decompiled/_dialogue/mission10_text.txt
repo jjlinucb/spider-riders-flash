@@ -1,0 +1,37 @@
+Mission 10: 
+txtM10Z1_p1: No use going any further.
+txtM10Z2_p1: All is quiet in the town tonight.
+txtM10Z3_p1: You are one of Prince Lumen's guests. You can go ahead.
+txtM10Z4_p1: You can't come in
+txtM10Z4_p2: The guards have not seen anything in the town
+txtM10Z5_p1: Strangers are not allowed inside the fortress.
+txtM10Z5_p2: The guards have not seen anything in the town
+txtM10Z6_p1: I don't understand why you need the keys to the Fortress.
+txtM10Z6_p2: But since Corona herself has asked...
+txtM10Z7_p1: You did very well. I'm sure the other Spider Riders will like you.
+txtM10Z7_p2: Let's meet inside the Fortress. I will find you a room so you can sleep.
+txtM10Z7_p3: Take this seal. You can give it to the guards posted in front of the Fortress.
+txtM10Z8_p1: You make a good team, but next time we'll win.
+txtM10Z9_p1: I must do some work in my shop. Come see me tomorrow.
+txtM10Z10_p1: The doors to the Hall have been closed for a long time.
+txtM10Z10_p2: Prince Lumen is out riding his spider for a bit of exercise.
+txtM10Z11_p1: I'm glad you've come all the way here. This is Hortala, my spider.
+txtM10Z11_p2: I hope you will stay with us for a long time. You'll see, we're going to have lots of fun.
+txtM10Z12_p1: Grriw... Griw...
+txtM10Z13_p1: I searched the other rooms and there's no trace of the spy. This is the only room left.
+txtM10Z13_p2: Sadly, I don't have the key to the Princess' room.
+txtM10Z14_p1: Door unlocked.
+txtM10Z15_p1: Miss Corona has asked that a room be prepared for you.
+txtM10Z16_p1: You've just found your very first Battle Action card.
+txtM10Z16_p2: With these cards, you can do special things during battles.
+txtM10Z17_p1: I think I heard somebody moving around on the balcony.
+txtM10Z18_p1: There you are!
+txtM10Z18_p2: I've asked that a guest room be set up for you.
+txtM10Z18_p3: Here's the key.
+txtM10Z19_p1: I came right away when I heard sounds of people fighting.
+txtM10Z19_p2: You were dealing with a spy under the Invectids' control.
+txtM10Z19_p3: He must still be inside the Fortress. Hurry, we must find him!
+txtM10Z20_p1: My master wants you to follow me to the hive.
+txtM10Z20_p2: Never!
+txtM10Z20_p3: Don't try to fight me.. No one can save you.
+txtM10Z21_p1: You've completed Mission #10. Congratulations!

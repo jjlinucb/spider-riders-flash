@@ -1,0 +1,7 @@
+Mission 1: 
+txtM1Z1_p1: You can move by clicking on the square that you want to move to.
+txtM1Z2_p1: To pick something up, you must go to the square where the object is.
+txtM1Z3_p1: You have completed the first mission.You are on your way to becoming a great Spider Rider!
+txtM1Z4_p1: Click on an object in your backpack, then place it where you would like to use it.
+txtM1Z4_p2: Ropes are great for climbing up walls!
+txtM1Z4_p3: Click on the rope in your backpack and place it on the wall.

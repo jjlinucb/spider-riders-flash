@@ -1,0 +1,31 @@
+onClipEvent(load){
+   this.onPress = function()
+   {
+      var _loc1_ = _parent;
+      this.gotoAndStop("down");
+      trace(_loc1_.sprSex + "/" + root.sprSex);
+      if(root.sprSex == 1)
+      {
+         _loc1_.spiderChange = true;
+         _loc1_.sprSex = root.sprSex = 2;
+         _loc1_.sproffSet = 4;
+         _loc1_.refreshPerso();
+      }
+   };
+   this.onRollOver = function()
+   {
+      this.gotoAndStop("over");
+   };
+   this.onRollOut = function()
+   {
+      this.gotoAndStop("up");
+   };
+   this.onRelease = function()
+   {
+      this.gotoAndStop("up");
+   };
+   this.onReleaseOutside = function()
+   {
+      this.gotoAndStop("up");
+   };
+}

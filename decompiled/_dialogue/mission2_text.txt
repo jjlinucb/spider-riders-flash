@@ -1,0 +1,6 @@
+Mission 2: 
+txtM2Z1_p1: You've just found a Boost card! It will help you during battles by increasing the strength of your attacks.
+txtM2Z2_p1: Careful! You must defeat a creature that can attack you by rolling the dice.
+txtM2Z2_p2: Each opponent plays in turn.
+txtM2Z2_p3: The game will now determine who starts.
+txtM2Z3_p1: You have completed the second mission. You make a great Spider Rider!

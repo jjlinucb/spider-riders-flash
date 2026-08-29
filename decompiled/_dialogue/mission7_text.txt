@@ -1,0 +1,68 @@
+Mission 7: 
+txtM7Z1_p1: You're a warrior too.
+txtM7Z1_p2: Your spider is wonderful. You should go see my brother. He could train you to become a true Spider Rider warrior.
+txtM7Z2_p1: I've never seen you before.
+txtM7Z3_p1: Fortunately, the prisoners are safe and sound!
+txtM7Z3_p2: We must get some tools from the shopkeeper to stop the Invectids.
+txtM7Z3_p3: But I don't know how to battle.
+txtM7Z4_p1: I can't face the Invectids without my spider that they've captured.
+txtM7Z4_p2: You're our only hope of stopping them.
+txtM7Z4_p3: But you must find better equipment. The shopkeeper can sell you this equipment.
+txtM7Z4_p4: ... but, you have to buy it!
+txtM7Z4_p5: I tried to stop the Invectids from entering the village...
+txtM7Z4_p6: But the Invectid beat me and took my spider. I'm no match for him alone.
+txtM7Z4_p7: The Invectids are too powerful. You don't have enough equipment to put up a good fight.
+txtM7Z5_p1: Now we must drive out the Invectids!
+txtM7Z5_p2: We're doomed.
+txtM7Z6_p1: Our fate will now be decided in the village.
+txtM7Z6_p2: Do you have everything you need to free the villagers?
+txtM7Z6_p3: With your help, I was able to start working again. I make wood boards to repair the houses in the village.
+txtM7Z7_p1: I wanted to see if the villagers were trapped inside the cave, but the Invectids attacked the village...
+txtM7Z7_p2: I wanted to protect my house. I can give you my Pick if you want.
+txtM7Z8_p1: I have bad news.
+txtM7Z8_p2: The Invectids have launched a surprise attack against the village. They ran in with their monster when we opened the doors.
+txtM7Z8_p3: A warrior tried to drive them back, but he didn't succeed.
+txtM7Z8_p4: They need your help.
+txtM7Z9_p1: The prisoners will soon be free.
+txtM7Z9_p2: Only fire can break this Invectid's web.
+txtM7Z9_p3: The bridge seems sturdy enough to let the prisoners across, but we must destroy this web.
+txtM7Z9_p4: Without fire, it's impossible.
+txtM7Z9_p5: Your spider's web is not strong enough to let through the people trapped in the cave.
+txtM7Z9_p6: We have to build a bridge with a wood board to help them across...
+txtM7Z9_p7: ... and clear the path that was blocked by the web and the rocks.
+txtM7Z9_p8: Only fire can break this Invectid's web.
+txtM7Z10_p1: The prisoners are on their way back. You've managed to protect us once again.
+txtM7Z10_p2: You've already cleared part of the path. I see a prisoner. Have you found everything you need to help them out?
+txtM7Z11_p1: Let's get out of here
+txtM7Z12_p1: Here, Stranger. Take this ring. Give it to my husband to show him that I'm still alive.
+txtM7Z13_p1: I want to go back home.
+txtM7Z13_p2: I will see my father again. I'm sure he will reward you.
+txtM7Z14_p1: I'm afraid that I'll never see my dad again.
+txtM7Z14_p2: We are going back to the village.
+txtM7Z15_p1: We can't break out of this cave.
+txtM7Z15_p2: The hole in the ground is blocking our way... We could cross with a wood board.
+txtM7Z15_p3: But we also must clear the path.
+txtM7Z15_p4: We're trapped.
+txtM7Z15_p5: You did it!
+txtM7Z16_p1: We have been ordered not to let any strangers through.
+txtM7Z17_p1: We are waiting for Princess Sparkle to return.
+txtM7Z18_p1: I hear shouts of joy in the village. Perhaps the Spider Riders have managed to chase our enemies away!
+txtM7Z18_p2: The shopkeeper has entered his shop. Is he the bearer of good news?
+txtM7Z18_p3: The Invectids have finally managed to invade the village. They will destroy our land once again.
+txtM7Z19_p1: This ring belongs to my wife! Is she OK? If you need anything, come see me.
+txtM7Z20_p1: I can't open my shop. My wife is missing in the mountains. I must go look for her.
+txtM7Z21_p1: The prisoners are free!
+txtM7Z21_p2: Are you going to face the Invectid Champion
+txtM7Z21_p3: The Invectids have invaded the village and the Spider Riders aren't doing anything!
+txtM7Z22_p1: Look at the Champion they sent us.
+txtM7Z22_p2: He looks like a baby.
+txtM7Z22_p3: Our warrior will defeat him no problem!
+txtM7Z22_p4: Get out of here, you rat! Don't even think of tackling our Champion. He'll break you in half!
+txtM7Z22_p5: Our warrior will defeat him no problem!
+txtM7Z23_p1: You've completed mission #7. Congratulations!
+txtM7Z23_p2: I see you're all set for battle.
+txtM7Z23_p3: Be careful, this is a fearsome enemy.
+txtM7Z23_p4: Stay close to your spider. And good luck.
+txtM7Z24_p1: This is a sad day.
+txtM7Z25_p1: A warrior must defeat the Invectids.
+txtM7Z26_p1: Here is what you'll need.

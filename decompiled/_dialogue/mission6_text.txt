@@ -1,0 +1,18 @@
+Mission 6: 
+txtM6Z1_p1: Who are you?
+txtM6Z1_p2: Some villagers told me that an unknown Spider Rider won the latest Invectid attack. If that's the case, you truly deserve to be a part of our team.
+txtM6Z1_p3: I don't have time to go with you to the Fortress and introduce you to the Prince. I must complete my mission first.
+txtM6Z1_p4: You've managed to tame a spider. This will help you during battle. Your spider can also help you go to many places.
+txtM6Z1_p5: With the spider's web, you can climb walls and jump over holes in the ground.
+txtM6Z2_p1: Have you seen any people around here?
+txtM6Z2_p2: Since the Invectids attacked, some of the villagers have been missing. I fear something terrible may have happened to them.
+txtM6Z2_p3: We must find them quickly.
+txtM6Z3_p1: I saw another warrior go through the forest. Maybe he was looking for you.
+txtM6Z4_p1: I can help you even outside battles. My web is very strong, you'll see.
+txtM6Z5_p1: The doors to the village will stay closed until we find our missing family and friends.
+txtM6Z5_p2: They had gone to go pick medicine plants to heal our wounded.
+txtM6Z5_p3: But they never came back from that trip.
+txtM6Z6_p1: Alert! A Spider Rider!
+txtM6Z7_p1: My friends have been taken prisoner in the cave by those monsters.
+txtM6Z7_p2: Please save them!
+txtM6Z8_p1: We've been saved!

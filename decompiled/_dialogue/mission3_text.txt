@@ -1,0 +1,8 @@
+Mission 3: 
+txtM3Z1_p1: I... talk to you... Have to... You are... too far... bring... Manacle...
+txtM3Z2_p1: You have completed the third mission.
+txtM3Z3_p1: Thank you for finding the Manacle. It will allow me to make a connection with you.
+txtM3Z3_p2: I've been waiting for you for a long time. But I can't talk to you for very long.
+txtM3Z3_p3: Trust me. Come and join us. Our world needs your help.
+txtM3Z3_p4: Please, go through the portal.
+txtM3Z4_p1: Congratulations! You've found the Manacle!

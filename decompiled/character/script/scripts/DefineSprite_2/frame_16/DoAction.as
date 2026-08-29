@@ -1,0 +1,2 @@
+pickUpFct();
+gotoAndStop("idle");

@@ -1,0 +1,12 @@
+Mission 4: 
+txtM4Z1_p1: I found this key in the forest while picking flowers. I think it belongs to the lumberjack.
+txtM4Z1_p2: He must have hidden in the village during the attack.
+txtM4Z1_p3: Thank you for saving me. I was in the forest when the Invectids attacked. I didn't hear the warning.
+txtM4Z1_p4: The doors to the village are now closed. I must hide. See you later, Stranger.
+txtM4Z1_p5: See you later, Stranger. I hope our paths will cross once again.
+txtM4Z2_p1: There was an axe inside the lumberjack's house!
+txtM4Z3_p1: You should not have come into this forest, Stranger!
+txtM4Z4_p1: You've just found an Equipment card.
+txtM4Z4_p2: You can play this card during battles when you get a green die.
+txtM4Z5_p1: Enemy alert!
+txtM4Z6_p1: You have completed the fourth mission.

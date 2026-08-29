@@ -1,0 +1,77 @@
+Mission 14: 
+txtM14Z1_p1: I'm going fishing while my mother works in the garden.
+txtM14Z1_p2: You saw my mother go inside to prepare a healing potion.
+txtM14Z1_p3: Hurry, I must tend to the fire or else she will scold me.
+txtM14Z1_p4: We'll go fishing another time.
+txtM14Z2_p1: A warrior came to the village, but she didn't stay very long.
+txtM14Z2_p2: She went into the forest.
+txtM14Z3_p1: The Spider Riders were successful in driving back the Invectids for good.
+txtM14Z4_p1: I think the healer went to see her plants this morning.
+txtM14Z4_p2: I just saw the healer as she was going home.
+txtM14Z5_p1: I would like to become a Spider Rider like you one day.
+txtM14Z6_p1: Thanks to you, I was able to prepare a supply of medicine. One bottle of this medicine belongs to you.
+txtM14Z7_p1: Of course, I can sell you this tool.
+txtM14Z8_p1: Hello.
+txtM14Z9_p1: Thanks for the flower. It will help me to make medicine. But I still need three flowers to make it.
+txtM14Z9_p2: I still need two flowers to make this medicine.
+txtM14Z9_p3: I only need one flower to make this medicine.
+txtM14Z9_p4: I can now go home to make the medicine.
+txtM14Z9_p5: I hope my son kept the fire burning. I need lots of heat to prepare this potion.
+txtM14Z10_p1: Hello, Stranger. What a great day for gardening.
+txtM14Z11_p1: I hope you find Corona.
+txtM14Z12_p1: Prince Lumen asked to speak to you.
+txtM14Z13_p1: The town seems safe now. The Turandots can leave the Fortress.
+txtM14Z14_p1: We made it through once again.
+txtM14Z15_p1: Mother, come see outside!
+txtM14Z16_p1: Are we out of danger?
+txtM14Z17_p1: Come quickly! Prince Lumen would like to speak to you.
+txtM14Z18_p1: Our warriors drove back the Invectids once again.
+txtM14Z19_p1: My necklace! Thank you, stranger. Here, take these Gils as a token of my gratitude.
+txtM14Z20_p1: I hope the craftsman will be able to deliver the necklace I ordered. I am looking forward to receiving it.
+txtM14Z21_p1: What a fight!
+txtM14Z21_p2: What has gotten into our enemies?
+txtM14Z22_p1: You and your Spider Rider defended yourselves well.
+txtM14Z23_p1: Those monsters turned my shop upside down.
+txtM14Z23_p2: Luckily, they didn't damage my work.
+txtM14Z23_p3: We should bring this necklace to the woman who ordered it.
+txtM14Z24_p1: Do you know where Corona is?
+txtM14Z25_p1: I have a bad feeling.
+txtM14Z26_p1: I saw a warrior go through the forest. I think she was chasing an enemy.
+txtM14Z27_p1: There you are!
+txtM14Z27_p2: I think we have another problem on our hands.
+txtM14Z27_p3: Corona is nowhere to be found since the Invectids attacked.
+txtM14Z27_p4: We must check the plains to see if she needs help.
+txtM14Z28_p1: You were very brave. But I fear our problems are not over yet.
+txtM14Z29_p1: Fortunately, you found us. We followed a warrior woman all the way to this marsh.
+txtM14Z29_p2: But one of Mantid's monsters took us by surprise. Corona has been hurt.
+txtM14Z29_p3: We must go get medicine for her.
+txtM14Z30_p1: It's a trap!
+txtM14Z31_p1: Thank you... This potion works really well, but I'm still too weak.
+txtM14Z31_p2: The Invectids have ordered a monster to guard the marsh.
+txtM14Z31_p3: You must not stay here.
+txtM14Z31_p4: Go get some help.
+txtM14Z31_p5: What's that noise?
+txtM14Z31_p6: The monster is coming back!
+txtM14Z31_p7: Run away quickly or else it will be too late.
+txtM14Z32_p1: Stop the fight!
+txtM14Z32_p2: You fought well, Spider Rider, but you're still no match for me.
+txtM14Z32_p3: My master heard you were coming to this world.
+txtM14Z32_p4: He knows the legend that tells of a human from the outside world coming to save the Turandots from destruction.
+txtM14Z32_p5: You ruin our plans, so listen to me: do not stand in my way or you will have to deal with me.
+txtM14Z32_p6: Return to your town! Go tell your Prince that the Invectids are going to win this war.
+txtM14Z32_p7: The world of Arachna will soon belong to my Mantid.
+txtM14Z32_p8: Too late, Spider Rider. You will pay the price for not minding your own business. Prepare to die!
+txtM14Z32_p9: Stop! You can't fight her alone.
+txtM14Z32_p10: I am Aquine. I was raised by Mantid to destroy the Spider Riders. She is mine.
+txtM14Z33_p1: Leave this area... My patience is running out!
+txtM14Z34_p1: Next time, I will crush you.
+txtM14Z35_p1: I'm hurt. I can't move. Go... It's too dangerous...
+txtM14Z35_p2: It's too late. Run away!
+txtM14Z35_p3: We must go find Prince Lumen.
+txtM14Z36_p1: She needs to regain her strength.
+txtM14Z36_p2: Go get some help while I watch over Corona.
+txtM14Z36_p3: Let's get out of this marsh quickly.
+txtM14Z37_p1: You've completed Mission #14. Congratulations!
+txtM14Z37_p2: There you are!
+txtM14Z37_p3: I have had to clear the rocks that were blocking the path to join you.
+txtM14Z37_p4: Come, the path is clear!

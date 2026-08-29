@@ -1,0 +1,37 @@
+Mission 9: 
+txtM9Z1_p1: Here we are in the town of Arachna, ruled by Prince Lumen.
+txtM9Z1_p2: This town is in the heart of Turandot country. It is protected by a small group of fighters called the Spider Riders.
+txtM9Z1_p3: We're part of a group of warriors, but we need more Spider Riders!
+txtM9Z1_p4: I want you to meet the Prince. I must be sure of one thing before I take you to him: do you have what it takes to become a true Spider Rider?
+txtM9Z1_p5: The only way to find out is to challenge you to a battle. How about a friendly duel inside the Coliseum? But it's getting late and the doors must be closed.
+txtM9Z1_p6: We need to ask the guard to open the Coliseum doors for our battle.
+txtM9Z2_p1: It's too late now to leave town.
+txtM9Z3_p1: I am guarding the entrance to the town. If you are looking for the Coliseum doors, just go to the end of this street.
+txtM9Z3_p2: It's too late now to leave town.
+txtM9Z4_p1: Here we are in the town of Arachna, ruled by Prince Lumen.
+txtM9Z4_p2: This town is in the heart of Turandot country. It is protected by a small group of fighters called the Spider Riders.
+txtM9Z4_p3: We're part of a group of warriors, but we need more Spider Riders!
+txtM9Z4_p4: I want you to meet the Prince. I must be sure of one thing before I take you to him: do you have what it takes to become a true Spider Rider?
+txtM9Z4_p5: The only way to find out is to challenge you to a battle. How about a friendly duel inside the Coliseum? But it's getting late and the doors must be closed.
+txtM9Z4_p6: We need to ask the guard to open the Coliseum doors for our battle.
+txtM9Z5_p1: I'm glad to be in this safe place.
+txtM9Z6_p1: I know everyone in this town. You're not from around here, are you?
+txtM9Z7_p1: I'm closing my shop, but you can come back tomorrow if you need anything.
+txtM9Z8_p1: Time to go home.
+txtM9Z8_p2: Now there's a true warrior!
+txtM9Z8_p3: I bet you're looking for the keys to the Coliseum doors.
+txtM9Z8_p4: Here they are. Have a great battle.
+txtM9Z9_p1: I shut down my store and I'm going home.
+txtM9Z10_p1: My parents tell me never to talk to strangers.
+txtM9Z11_p1: I like watching the water flow from the fountain.
+txtM9Z12_p1: The audience is over.
+txtM9Z13_p1: Prince Lumen sees no one at this hour.
+txtM9Z14_p1: I must go back to my family.
+txtM9Z15_p1: Careful! You're facing a true Spider Rider.
+txtM9Z15_p2: Corona is an excellent fighter who has cards she can play in battle.
+txtM9Z15_p3: Good luck!
+txtM9Z15_p4: You found the keys!
+txtM9Z15_p5: We can go in and have a battle.
+txtM9Z15_p6: Beware, I won't go easy on you.
+txtM9Z16_p1: We are in front of the Coliseum but the doors are closed. If I had the keys, I could enter and challenge you in a friendly duel.
+txtM9Z17_p1: Can I help you? I make all kinds of objects.

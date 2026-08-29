@@ -1,0 +1,40 @@
+Mission 11: 
+txtM11Z1_p1: It's been a quiet night. My watch duty is over. I can go to bed.
+txtM11Z2_p1: What a great day!
+txtM11Z3_p1: I made this armor to protect the Spider Riders' spiders. It's for sale, if you want it.
+txtM11Z4_p1: I love to start work bright and early in the morning.
+txtM11Z5_p1: I made this armor to protect the Spider Riders' spiders. It's for sale, if you want it.
+txtM11Z6_p1: Igneous has left the Fortress and is on his way to the Coliseum.
+txtM11Z7_p1: This morning, Prince Lumen has guests in the Hall.
+txtM11Z8_p1: Be wary of Igneous. He's an excellent fighter, but he's very sure of himself. If you face him in battle, you'd be wise to be better equipped.
+txtM11Z8_p2: You've completed Mission #11. Congratulations!
+txtM11Z8_p3: Igneous is waiting for you in the Coliseum.
+txtM11Z8_p4: He is strong and brave but he doesn't do any favors.
+txtM11Z8_p5: Good luck!
+txtM11Z9_p1: Corona seems to be worried for you.
+txtM11Z10_p1: If you want this Manacle, it's yours!
+txtM11Z11_p1: Hello stranger. You've come to see what I have to sell?
+txtM11Z12_p1: This Manacle has great powers.
+txtM11Z13_p1: Prince Lumen would like to thank you for protecting his sister.
+txtM11Z14_p1: Whatever next! The Prince wants you to join our team! You need a lesson in defeat. I challenge you on the sands of the Coliseum to see if you have real Spider Rider skills.
+txtM11Z15_p1: I'd love for you to join our group. We need more brave warriors to protect our country.
+txtM11Z15_p2: So there you are.
+txtM11Z15_p3: My sister Sparkle told me how you got her out of trouble last night.
+txtM11Z15_p4: You showed great courage. As a gesture of thanks, I'd like to offer you a reward.
+txtM11Z15_p5: Corona claims you can fight like a true Spider Rider.
+txtM11Z15_p6: My team is in need of more warriors. Would you like to join us?
+txtM11Z15_p7: We could help you complete your training.
+txtM11Z16_p1: We thank you in the name of the royal family.
+txtM11Z17_p1: Hmm... Another pair.
+txtM11Z18_p1: Hello, Stranger.
+txtM11Z18_p2: We are waiting for you in the Hall.
+txtM11Z18_p3: The Prince would like to reward you for your great deeds.
+txtM11Z18_p4: But don't forget: it's not just anybody who can be a Spider Rider.
+txtM11Z19_p1: Rise and shine! I hope you slept well.
+txtM11Z19_p2: Now hurry up. The Prince is waiting for you in the Hall.
+txtM11Z19_p3: He wants to reward you for your deeds yesterday.
+txtM11Z20_p1: I slept pretty well in spite of the scare that horrible grasshopper gave me.
+txtM11Z20_p2: Thank you for saving my life.
+txtM11Z21_p1: Welcome to my shop.
+txtM11Z22_p1: This weapon suits you perfectly, if you want to buy it.
+txtM11Z23_p1: This weapon suits you perfectly, if you want to buy it.

@@ -1,0 +1,33 @@
+Mission 5: 
+txtM5Z1_p1: I see you're wearing a Manacle?  Thanks to Manacles such as these Spider Riders have been able to bond with their battle spiders.
+txtM5Z1_p2: Are you a Spider Rider too? Where's your spider?
+txtM5Z1_p3: Thank you for finding this medicinal plant.
+txtM5Z1_p4: Thanks to you, I can make my medicinal balm that will save the young warrior.
+txtM5Z1_p5: Thank you for finding this medicinal plant.
+txtM5Z1_p6: Unfortunately, I lost my tool bag and I'm afraid of going back inside the forest to find it.
+txtM5Z1_p7: You managed to find my bag.
+txtM5Z1_p8: Thanks to you, I can make my medicinal balm that will save the young warrior.
+txtM5Z1_p9: You managed to find my bag.
+txtM5Z1_p10: Now I need a purple flower. They say they grow in dark caves.
+txtM5Z2_p1: There is a wounded warrior in the forest.
+txtM5Z2_p2: I must help him, but I need a purple flower to make medicine.
+txtM5Z2_p3: I also lost my bag with all of my tools.
+txtM5Z2_p4: When you have found your spider, use your Manacle to talk to it.
+txtM5Z3_p1: This manacle does not allow you to open these doors.
+txtM5Z4_p1: The Invectids have launched another attack. The doors must remain closed to ensure that Arachna is safe.
+txtM5Z4_p2: The doors will remain closed as long as the Invectid commander and his monster are in the forest.
+txtM5Z5_p1: Move along. I don't want to talk to you.
+txtM5Z6_p1: What's happening? I hear the Oracle's voice. She says you are on your way to becoming a Spider Rider. I will join you in this adventure to the very end.
+txtM5Z7_p1: Poor fool! Go tell your people this forest now belongs to us.
+txtM5Z8_p1: They're invincible... Retreat!
+txtM5Z8_p2: Hummm... You don't look like the Turandots, do you? Our master was right: there's an intruder in the forest.
+txtM5Z8_p3: I'd get a reward for catching you. Charge!
+txtM5Z9_p1: I owe you my life, Stranger. I will never forget it.
+txtM5Z9_p2: Here's a key I found in the forest.  This may be useful for you.
+txtM5Z10_p1: The Invectids... They attacked me... I'm... wounded...
+txtM5Z10_p2: The Invectid commander uses his Monster to help him control the forest. We're caught in a trap. Only a Spider Rider could defeat him.
+txtM5Z11_p1: My key! At last! But I can't go back home. The forest is crawling with Invectids.
+txtM5Z11_p2: But YOU have to return. I can lend you my axe to defend yourself.
+txtM5Z11_p3: Please, noble warrior, protect us from the Invectids.
+txtM5Z12_p1: I lost the key to my house and I don't think the forest is safe. Luckily, I found my axe.
+txtM5Z12_p2: This rope looks like the ones we use to climb the face of the mountain.

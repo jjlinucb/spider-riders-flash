@@ -1,0 +1,16 @@
+Mission 13: 
+txtM13Z1_p1: I can handle their troops, but I'm a little busy.
+txtM13Z1_p2: And we have another major problem on our hands. Can you handle it?
+txtM13Z2_p1: A monster is destroying our town!
+txtM13Z3_p1: We have to strike back at the Invectids as soon as possible!
+txtM13Z4_p1: That wasn't enough, was it? Alright. Fire!
+txtM13Z4_p2: Stupid Spider Rider! Maybe you managed to beat my monster, but you don't stand a chance against my arsenal.
+txtM13Z5_p1: You've completed Mission #13. Congratulations!
+txtM13Z5_p2: You won this battle, Spider Rider. But we'll be back to drive the Turandots out of the world of Arachna!
+txtM13Z5_p3: Step back, dumb human... I order you to move back...
+txtM13Z6_p1: I think Igneous has the situation under control.
+txtM13Z7_p1: The Invectid's attack is threatening the town.
+txtM13Z8_p1: The Invectids are destroying the town.
+txtM13Z9_p1: The townspeople are safe and sound inside the fortress.
+txtM13Z10_p1: Our houses will be destroyed.
+txtM13Z11_p1: The Spider Riders will drive out our enemies.

@@ -1,0 +1,2 @@
+gotoAndStop("idle");
+game.endInteruptFct();
