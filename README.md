@@ -19,6 +19,36 @@ local hardcoded tables, so combat works identically offline.
 Practically: any username/password logs you in, and all 15 single-player missions,
 the card battle system, and the minigames are fully playable.
 
+## Features added on top of the original
+
+Two small binary patches on top of the original recovered SWFs, both applied via
+JPEXS FFDec (`-export script` → hand-edit the `.as` → `-importScript`; only the
+one changed script per SWF is reimported, not the full tree — see git history for
+the exact diffs). Each patched SWF has an `*.orig.swf` sibling with the pre-patch
+bytes, kept as a rollback point.
+
+- **Mission select**: a "choose a mission" screen in `index.html` before Ruffle
+  boots, passed through as a `startMission` FlashVar. See the comment block at the
+  top of `index.html` for the exact patch location
+  (`SpiderRider_2_edited.swf`, `frame_10/DoAction.as`).
+- **Auto-battle**: a checkbox next to the mission dropdown, passed as an
+  `autoBattle` FlashVar. `SpiderRider_2_edited.swf` normalizes it to a boolean on
+  `root` (same `frame_10` patch site as mission select). `battleSystem_2.swf`'s
+  `SetMode()` (`decompiled/battleSystem/scripts/DefineSprite_3152/frame_1/DoAction_5.as`)
+  checks it at the two points a human would otherwise click a button —
+  `MODE_NEXT_TURN` (rolls dice) and `MODE_CARD` (attacks) — gated on
+  `CurrentPlayer == TURN_PLAYER` so the existing opponent AI is untouched. It
+  doesn't drag dice onto cards first, so no card bonuses are applied — it's meant
+  for fast playtesting, not optimal play. **Not yet confirmed with an actual
+  playthrough** — the sandbox this was built in can't run Ruffle's WASM render
+  loop (a `document.visibilityState`-stuck-hidden issue, same root cause as a
+  similar Phaser-side issue hit earlier in this project, but Ruffle has no
+  `headlessStep`-style manual-tick escape hatch to work around it). The patch was
+  verified as far as: exports/reimports byte-clean, the SWF loads to 100% in
+  Ruffle with no console errors, and `loadedConfig.parameters.autoBattle` carries
+  the right value through — but nobody has watched dice actually roll on their
+  own yet. Worth a quick manual check in a real browser before relying on it.
+
 ## Running locally
 
 Browsers block WASM/fetch on `file://`, so this needs a static server, not just
@@ -59,8 +89,6 @@ python3 -m http.server 8000
   is just "≥ 58000" with no upper bound — so the bad value immediately maxes out
   attack/defense/health stats. Root cause of *why* Victory Pts gets corrupted in
   the first place hasn't been traced yet.
-- **No mission-skip**: progression is sequential only; no debug/cheat menu exists
-  to jump to a specific mission.
 - **Audio**: not verified either way — nobody's confirmed whether music/sound
   effects actually play through Ruffle yet.
 

@@ -33,6 +33,19 @@
     mission. (SpiderRider_2_edited.orig.swf alongside this file is the
     pre-patch backup, kept in case this ever needs reverting.)
 
+  - Auto-battle: the checkbox next to the mission dropdown is passed to
+    Ruffle as an `autoBattle` FlashVar. SpiderRider_2_edited.swf normalizes
+    it to a real boolean on root (frame_10, right after the autoBattle
+    FlashVar read added alongside startMission). battleSystem_2.swf's
+    SetMode() (DefineSprite_3152/frame_1/DoAction_5.as) checks
+    `root.autoBattle` at the two points a human would otherwise click a
+    button: MODE_NEXT_TURN (throws dice for you, same as the Dice button)
+    and MODE_CARD (attacks for you, same as the Action button) — but only
+    when CurrentPlayer == TURN_PLAYER, so the existing opponent AI is
+    untouched. It intentionally doesn't drag dice onto cards first (no
+    bonuses applied), matching what "just let it roll and attack" asked
+    for — good enough for fast playtesting, not for optimal play.
+
   HOW TO RUN: modern browsers block WebAssembly/fetch from file:// origins, so
   double-clicking this file will NOT work reliably. Serve the folder over HTTP
   instead, e.g. from a terminal in this directory:
@@ -194,6 +207,10 @@
     <label for="mission-select">Mission</label>
     <select id="mission-select"></select>
   </div>
+  <div class="field-row">
+    <label for="autobattle-checkbox">Auto-battle</label>
+    <input id="autobattle-checkbox" type="checkbox" />
+  </div>
   <button id="start-button" type="button">Start Game</button>
 </div>
 
@@ -209,6 +226,7 @@
     const stageWrapperEl = document.getElementById("stage-wrapper");
     const statusEl = document.getElementById("status");
     const missionSelectEl = document.getElementById("mission-select");
+    const autoBattleCheckboxEl = document.getElementById("autobattle-checkbox");
     const startButtonEl = document.getElementById("start-button");
 
     // Populate the mission dropdown: Mission 1 .. Mission 15, default = 1.
@@ -229,6 +247,7 @@
 
     const startGame = () => {
       const chosenMission = String(parseInt(missionSelectEl.value, 10) || 1);
+      const chosenAutoBattle = String(!!autoBattleCheckboxEl.checked);
 
       missionScreenEl.classList.add("hidden");
       stageWrapperEl.classList.remove("hidden");
@@ -249,6 +268,7 @@
               GAMEDEBUG: "false",
               xmlNbr: "01",
               startMission: chosenMission,
+              autoBattle: chosenAutoBattle,
             },
             allowScriptAccess: true,
             backgroundColor: "#000000",
