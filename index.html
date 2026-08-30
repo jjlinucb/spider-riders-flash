@@ -46,6 +46,32 @@
     bonuses applied), matching what "just let it roll and attack" asked
     for — good enough for fast playtesting, not for optimal play.
 
+  - Save/load: this SWF version has no FileReference class and no
+    ExternalInterface (nothing calls addCallback), so there's no JS<->SWF
+    channel except the one-way getURL("javascript:...") bridge already used
+    by googleAnalytic(). Given that, saving works like this:
+      1. Autosave: frame_10/DoAction.as's autoSaveTick(), on a 5s
+         setInterval, snapshots the fields worth keeping (victory points,
+         mission, gils, name, card inventory - not avatar/spider
+         customization, which was cut from scope to avoid restoring
+         `undefined` customization fields as 0 into rendering code this
+         patch never traced) into a compact `|`-delimited string (see
+         buildSaveString()/applySaveString() in that file), writes it to the
+         existing `so` SharedObject (so.data.saveGame - the same local save
+         object camp1/2/3 webcodes already use) so it survives a refresh in
+         this browser, AND reports it to the page via
+         getURL("javascript:onSpiderSave('...')") so "Download current
+         save" above has something to offer as a file.
+      2. On boot, frame_10 checks for an `importedSave` FlashVar first, then
+         so.data.saveGame, and only falls back to the original hardcoded
+         blank stats if neither exists - existing saves and brand-new
+         players both see unchanged behavior.
+      3. Loading a file back in: since there's no JS->SWF channel, picking a
+         file in "Load a save file" doesn't reach into a running game - it's
+         read client-side and held until Start Game is clicked, at which
+         point its contents ride in as the `importedSave` FlashVar above.
+    Not yet confirmed with a live playthrough - see README.
+
   HOW TO RUN: modern browsers block WebAssembly/fetch from file:// origins, so
   double-clicking this file will NOT work reliably. Serve the folder over HTTP
   instead, e.g. from a terminal in this directory:
@@ -192,6 +218,50 @@
     background: #0a0a0c;
   }
 
+  /* --- Save bar: always visible, above the mission screen / stage --- */
+  #save-bar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+    font-size: 12px;
+  }
+
+  #save-file-input {
+    color: #cfd2d6;
+    font-size: 12px;
+    max-width: 220px;
+  }
+
+  #download-save-button {
+    background: #1c1c20;
+    color: #e8e6df;
+    border: 1px solid #3a3a40;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    font-family: inherit;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+
+  #download-save-button:hover:not(:disabled) {
+    background: #26262c;
+    border-color: #565b63;
+  }
+
+  #download-save-button:disabled {
+    color: #55585c;
+    cursor: default;
+  }
+
+  #save-status {
+    color: #7a7d82;
+    font-size: 12px;
+  }
+
   .hidden {
     display: none !important;
   }
@@ -200,6 +270,15 @@
 <body>
 
 <h1>Spider Riders &mdash; Battle for Arachna</h1>
+
+<div id="save-bar">
+  <div class="field-row">
+    <label for="save-file-input">Load a save file</label>
+    <input id="save-file-input" type="file" accept=".txt,.sav,text/plain" />
+  </div>
+  <button id="download-save-button" type="button" disabled>Download current save</button>
+  <span id="save-status"></span>
+</div>
 
 <div id="mission-screen">
   <p>Choose a mission to start from.</p>
@@ -228,6 +307,57 @@
     const missionSelectEl = document.getElementById("mission-select");
     const autoBattleCheckboxEl = document.getElementById("autobattle-checkbox");
     const startButtonEl = document.getElementById("start-button");
+    const saveFileInputEl = document.getElementById("save-file-input");
+    const downloadSaveButtonEl = document.getElementById("download-save-button");
+    const saveStatusEl = document.getElementById("save-status");
+
+    // Latest save string reported by the running SWF (frame_10/DoAction.as
+    // calls `getURL("javascript:onSpiderSave('...')")` every autosave tick,
+    // ~5s, since there's no ExternalInterface in this old SWF version to pull
+    // data out any other way). Whatever the SWF last reported is what
+    // "Download current save" writes to a file.
+    let latestSave = null;
+    // Contents of a save file the visitor picked before clicking Start Game.
+    // There's no JS -> SWF channel either, so this rides in as a FlashVar
+    // (`importedSave`, read by the same frame_10 patch) rather than being
+    // injected into a running game.
+    let importedSaveText = null;
+
+    window.onSpiderSave = (escapedSaveStr) => {
+      // AS2 only has escape()/unescape() (predates encodeURIComponent), and
+      // escape() emits %uXXXX for non-ASCII, which decodeURIComponent can't
+      // parse - unescape() is deprecated but is the actual matching decoder.
+      latestSave = unescape(escapedSaveStr);
+      downloadSaveButtonEl.disabled = false;
+    };
+
+    downloadSaveButtonEl.addEventListener("click", () => {
+      if (!latestSave) return;
+      const blob = new Blob([latestSave], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "spider-riders-save.txt";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    saveFileInputEl.addEventListener("change", () => {
+      const file = saveFileInputEl.files[0];
+      if (!file) return;
+      file.text().then((text) => {
+        const trimmed = text.trim();
+        if (trimmed.split("|").length < 5) {
+          saveStatusEl.textContent = "That doesn't look like a Spider Riders save file.";
+          saveFileInputEl.value = "";
+          return;
+        }
+        importedSaveText = trimmed;
+        saveStatusEl.textContent = "Save loaded - it'll be used when you click Start Game.";
+      });
+    });
 
     // Populate the mission dropdown: Mission 1 .. Mission 15, default = 1.
     for (let i = 1; i <= 15; i++) {
@@ -269,6 +399,7 @@
               xmlNbr: "01",
               startMission: chosenMission,
               autoBattle: chosenAutoBattle,
+              ...(importedSaveText ? { importedSave: importedSaveText } : {}),
             },
             allowScriptAccess: true,
             backgroundColor: "#000000",

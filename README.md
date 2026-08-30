@@ -39,15 +39,47 @@ bytes, kept as a rollback point.
   `MODE_NEXT_TURN` (rolls dice) and `MODE_CARD` (attacks) — gated on
   `CurrentPlayer == TURN_PLAYER` so the existing opponent AI is untouched. It
   doesn't drag dice onto cards first, so no card bonuses are applied — it's meant
-  for fast playtesting, not optimal play. **Not yet confirmed with an actual
-  playthrough** — the sandbox this was built in can't run Ruffle's WASM render
-  loop (a `document.visibilityState`-stuck-hidden issue, same root cause as a
-  similar Phaser-side issue hit earlier in this project, but Ruffle has no
-  `headlessStep`-style manual-tick escape hatch to work around it). The patch was
-  verified as far as: exports/reimports byte-clean, the SWF loads to 100% in
-  Ruffle with no console errors, and `loadedConfig.parameters.autoBattle` carries
-  the right value through — but nobody has watched dice actually roll on their
-  own yet. Worth a quick manual check in a real browser before relying on it.
+  for fast playtesting, not optimal play.
+- **Save/load**: this SWF version has no `FileReference` and no
+  `ExternalInterface` (nothing calls `addCallback`), so there's no JS↔SWF
+  channel except the one-way `getURL("javascript:...")` bridge `googleAnalytic()`
+  already used (note: not *through* `googleAnalytic()` itself — it silently no-ops
+  whenever `GAMEDEBUG` is a non-empty string, which it always is here, so the new
+  code calls `getURL` directly). `frame_10/DoAction.as` adds:
+  - `autoSaveTick()`, on a 5s `setInterval`: snapshots victory points, mission,
+    gils, name, and card inventory (deliberately *not* avatar/spider
+    customization — restoring `undefined` customization fields as `0` into
+    rendering code this patch never traced felt like the wrong tradeoff for a
+    feature this scoped) into a compact `|`-delimited string
+    (`buildSaveString()`/`applySaveString()`), writes it to the existing `so`
+    SharedObject (`so.data.saveGame` — the same local object the camp1/2/3
+    webcodes already use) so it survives a refresh, and reports it to the page
+    via `getURL` so the page's "Download current save" button has something to
+    offer.
+  - A boot-time check, ahead of the original hardcoded blank-stats fallback:
+    an `importedSave` FlashVar wins first, then `so.data.saveGame`, and only
+    *then* the original blank defaults — existing saves and brand-new players
+    both see unchanged behavior otherwise.
+  - `index.html` reads a picked save file client-side (there's no JS→SWF
+    channel to inject it into a *running* game) and holds it until Start Game
+    is clicked, at which point it rides in as the `importedSave` FlashVar above.
+
+**Neither of the above has been confirmed with a live playthrough** — the
+sandbox this was built in can't get Ruffle's AVM1 loop to actually run: `document.visibilityState`
+is stuck `"hidden"` (a similar issue to one hit earlier in this project on the Phaser
+side, but Ruffle exposes no `headlessStep`-style manual-tick escape hatch to work
+around it, and neither `suspend()`/`resume()` nor `backgroundExecutionMode: "worker"`
+freed it up). This blocks *all* AVM1 execution in that sandbox, old code and new
+alike, not just these two patches specifically — even the pre-existing autosave-free
+build would look identically stuck there. What *was* verified without needing the
+loop to run: both patches export/reimport byte-clean, the SWF loads to 100% in
+Ruffle with no console errors under several configs, and FlashVars/config
+(`autoBattle`, `importedSave`) carry the right values all the way into Ruffle's
+`loadedConfig` — plus, since it's plain JS unaffected by the AVM1 stall, the save
+file picker's own validate/accept/reject logic in `index.html` was exercised
+directly and works. But nobody has watched dice roll on their own, or watched a
+save file actually round-trip through a real playthrough, yet. Worth a real-browser
+check before relying on either.
 
 ## Running locally
 
