@@ -21,30 +21,52 @@
     original 2007 swfobject-based embed, kept untouched for reference).
 
   - Mission select: before Ruffle boots, visitors see a small "choose a
-    mission" screen (dropdown 1-15, default 1, Start Game button) instead of
-    the player loading immediately. The choice is passed to Ruffle as a
-    `startMission` FlashVar/parameter. SpiderRider_2_edited.swf has a small
-    patch in scripts/frame_10/DoAction.as, right after the shell's hardcoded
-    `playerStats.mission = 1;`:
+    mission" screen (dropdown 1-15 plus 3 bonus missions, default Mission 1,
+    Start Game button) instead of the player loading immediately. A regular
+    mission choice is passed to Ruffle as a `startMission` FlashVar/parameter.
+    SpiderRider_2_edited.swf has a small patch in scripts/frame_10/DoAction.as,
+    right after the shell's hardcoded `playerStats.mission = 1;`:
         if (startMission != undefined) { playerStats.mission = startMission; }
     The shell's existing frame_54 dispatcher already does
     `gotoAndStop("level" + root.playerStats.mission)`, so setting this one
     variable before boot is all that's needed to land directly on any
-    mission. (SpiderRider_2_edited.orig.swf alongside this file is the
-    pre-patch backup, kept in case this ever needs reverting.)
+    mission. A bonus-mission choice ("Bonus Mission 1/2/3" in the dropdown,
+    internally "camp1"/"camp2"/"camp3") instead rides in as a `startCamp`
+    FlashVar; frame_10 stashes it on `root.startCamp` and grants the player
+    every card in the game (`grantAllCards()`), and frame_54 got a new
+    branch, checked before the regular mission dispatch:
+        if (root.startCamp != undefined) {
+          root.so.data["camp" + root.startCamp] = true;  // bypasses the
+          root.so.flush();                                // original promo-
+          root.gotoAndPlay("camp" + root.startCamp);       // code gate
+        }
+    (The date-based lock on these three is already moot regardless — it only
+    fires if the real clock is still inside the original 2007-2009 promo
+    window, see README.) SpiderRider_2_edited.orig.swf alongside this file is
+    the pre-patch backup from before ANY patch in this file, kept in case
+    this ever needs reverting.
 
-  - Auto-battle: the checkbox next to the mission dropdown is passed to
-    Ruffle as an `autoBattle` FlashVar. SpiderRider_2_edited.swf normalizes
-    it to a real boolean on root (frame_10, right after the autoBattle
-    FlashVar read added alongside startMission). battleSystem_2.swf's
-    SetMode() (DefineSprite_3152/frame_1/DoAction_5.as) checks
-    `root.autoBattle` at the two points a human would otherwise click a
-    button: MODE_NEXT_TURN (throws dice for you, same as the Dice button)
-    and MODE_CARD (attacks for you, same as the Action button) — but only
-    when CurrentPlayer == TURN_PLAYER, so the existing opponent AI is
-    untouched. It intentionally doesn't drag dice onto cards first (no
-    bonuses applied), matching what "just let it roll and attack" asked
-    for — good enough for fast playtesting, not for optimal play.
+  - Auto-battle: a floating toggle button (top-right, works the same way as
+    2x Speed below — see that entry for why it has to rebuild the player
+    rather than flip a value live) sets an `autoBattle` FlashVar.
+    SpiderRider_2_edited.swf normalizes it to a real boolean on root
+    (frame_10, right after the autoBattle FlashVar read added alongside
+    startMission). battleSystem_2.swf's SetMode()
+    (DefineSprite_3152/frame_1/DoAction_5.as) checks `root.autoBattle` at the
+    two points a human would otherwise click a button: MODE_NEXT_TURN (throws
+    dice for you) and MODE_CARD (assigns rolled dice to cards, then attacks).
+    The MODE_CARD case now calls a new `AutoAssignDice()` (added right before
+    SetMode() in that file) before attacking: for each rolled green/yellow/
+    blue die still in `Dices`, it finds a matching inactive card in
+    `DeckPlayerInHandUI.Socket01..07` by the same CardID-range rule the
+    human drag-and-drop path uses (`Release()`, same file) — green activates
+    Weapon/Protection/Item(not 302)/Fusion cards, yellow activates Boost
+    cards, blue activates BattleAction cards + item 302 — and calls
+    `Activate()` directly, skipping the drag/hitTest entirely since nothing
+    async needs to happen. Red and white dice were already fully automatic
+    before this patch (resolved by the game itself ahead of MODE_CARD) and
+    are untouched. All gated on `CurrentPlayer == TURN_PLAYER`, so the
+    existing opponent AI is untouched.
 
   - Save/load: this SWF version has no FileReference class and no
     ExternalInterface (nothing calls addCallback), so there's no JS<->SWF
@@ -71,6 +93,20 @@
          read client-side and held until Start Game is clicked, at which
          point its contents ride in as the `importedSave` FlashVar above.
     Not yet confirmed with a live playthrough - see README.
+
+  - 2x Speed: a floating toggle button (top-right, works on every screen -
+    mission-select or mid-game) passes `frameRate: 60` in Ruffle's load()
+    config when on (SpiderRider_2_edited.swf's native rate, verified by
+    parsing the SWF header, is 30). No AS patch involved - Ruffle runs one
+    movie clock shared by every loaded SWF (missions, battleSystem, etc. all
+    execute under the same player instance), so overriding the rate at load
+    time doubles all of them at once. Ruffle only lets you pick a frame rate
+    when *building* a player instance, not on one already running, so
+    toggling mid-game tears the player down and rebuilds it, carrying
+    progress forward on the latest autosave (up to ~5s may rewind, and it
+    can't preserve an in-progress battle or exact map position - see the
+    save/load entry above for exactly what the autosave does and doesn't
+    capture). Off = untouched default (native 30fps).
 
   HOW TO RUN: modern browsers block WebAssembly/fetch from file:// origins, so
   double-clicking this file will NOT work reliably. Serve the folder over HTTP
@@ -265,11 +301,58 @@
   .hidden {
     display: none !important;
   }
+
+  #speed-toggle-bar {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+  }
+
+  #speed-toggle-button, #autobattle-toggle-button {
+    background: #1c1c20;
+    color: #e8e6df;
+    border: 1px solid #3a3a40;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    font-family: inherit;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+
+  #speed-toggle-button:hover, #autobattle-toggle-button:hover {
+    background: #26262c;
+    border-color: #565b63;
+  }
+
+  #speed-toggle-button.active, #autobattle-toggle-button.active {
+    background: #2f6f3e;
+    border-color: #4c9a5e;
+  }
+
+  #speed-toggle-note {
+    color: #7a7d82;
+    font-size: 11px;
+    max-width: 200px;
+    text-align: right;
+  }
 </style>
 </head>
 <body>
 
 <h1>Spider Riders &mdash; Battle for Arachna</h1>
+
+<div id="speed-toggle-bar">
+  <button id="speed-toggle-button" type="button">2x Speed: Off</button>
+  <button id="autobattle-toggle-button" type="button">Auto-battle: Off</button>
+  <span id="speed-toggle-note"></span>
+</div>
 
 <div id="save-bar">
   <div class="field-row">
@@ -286,10 +369,6 @@
     <label for="mission-select">Mission</label>
     <select id="mission-select"></select>
   </div>
-  <div class="field-row">
-    <label for="autobattle-checkbox">Auto-battle</label>
-    <input id="autobattle-checkbox" type="checkbox" />
-  </div>
   <button id="start-button" type="button">Start Game</button>
 </div>
 
@@ -305,11 +384,32 @@
     const stageWrapperEl = document.getElementById("stage-wrapper");
     const statusEl = document.getElementById("status");
     const missionSelectEl = document.getElementById("mission-select");
-    const autoBattleCheckboxEl = document.getElementById("autobattle-checkbox");
     const startButtonEl = document.getElementById("start-button");
     const saveFileInputEl = document.getElementById("save-file-input");
     const downloadSaveButtonEl = document.getElementById("download-save-button");
     const saveStatusEl = document.getElementById("save-status");
+    const speedToggleButtonEl = document.getElementById("speed-toggle-button");
+    const speedToggleNoteEl = document.getElementById("speed-toggle-note");
+    const autoBattleToggleButtonEl = document.getElementById("autobattle-toggle-button");
+
+    // Same rebuild-on-toggle story as `speedDoubled` below - there's no
+    // ExternalInterface in this SWF for JS to poke a running instance's
+    // `root.autoBattle` live, so toggling mid-game means tearing the player
+    // down and relaunching it with the new FlashVar value.
+    let autoBattleOn = false;
+
+    // Whether the *currently loaded* player (if any) was launched at 60fps.
+    // Ruffle only lets you pick a frame rate when building a player instance
+    // (ruffleinstancebuilder_setFrameRate is a construction-time call, not a
+    // method on the running player) - there's no live "change speed" knob on
+    // an instance already playing. So toggling mid-game means tearing down
+    // the current player and rebuilding one with the other rate, which is
+    // why this lives at the top level instead of as a mission-screen
+    // checkbox: it has to work the same way whether you're still on the
+    // mission-select screen (no player yet - just remembers the choice for
+    // the next Start Game) or mid-playthrough (rebuilds immediately).
+    let speedDoubled = false;
+    let currentPlayerEl = null;
 
     // Latest save string reported by the running SWF (frame_10/DoAction.as
     // calls `getURL("javascript:onSpiderSave('...')")` every autosave tick,
@@ -359,7 +459,12 @@
       });
     });
 
-    // Populate the mission dropdown: Mission 1 .. Mission 15, default = 1.
+    // Populate the mission dropdown: Mission 1 .. Mission 15, default = 1,
+    // plus the 3 bonus "camp" missions. Camp values are prefixed "camp" so
+    // launchPlayer can tell them apart from a plain mission number - they
+    // launch via a different FlashVar (startCamp, not startMission) since
+    // they're a separate part of the shell (frame_54's dispatcher), not one
+    // of the scrN_2.swf mission modules.
     for (let i = 1; i <= 15; i++) {
       const opt = document.createElement("option");
       opt.value = String(i);
@@ -369,26 +474,44 @@
       }
       missionSelectEl.appendChild(opt);
     }
+    for (let i = 1; i <= 3; i++) {
+      const opt = document.createElement("option");
+      opt.value = "camp" + i;
+      opt.textContent = "Bonus Mission " + i;
+      missionSelectEl.appendChild(opt);
+    }
 
     const setStatus = (msg, isError) => {
       statusEl.textContent = msg;
       statusEl.classList.toggle("error", !!isError);
     };
 
-    const startGame = () => {
-      const chosenMission = String(parseInt(missionSelectEl.value, 10) || 1);
-      const chosenAutoBattle = String(!!autoBattleCheckboxEl.checked);
+    // (re)builds the Ruffle player. `saveToUse` is passed explicitly by every
+    // caller (rather than defaulting to `importedSaveText` in here) so the
+    // speed toggle's "no autosave yet" case can unambiguously mean "launch
+    // with no save" instead of silently falling back to a stale file pick.
+    const launchPlayer = (saveToUse) => {
+      const selectedValue = missionSelectEl.value;
+      const chosenCamp = selectedValue.indexOf("camp") === 0 ? selectedValue.slice(4) : null;
+      const chosenMission = String(parseInt(selectedValue, 10) || 1);
+      const chosenAutoBattle = String(autoBattleOn);
 
       missionScreenEl.classList.add("hidden");
       stageWrapperEl.classList.remove("hidden");
       statusEl.classList.remove("hidden");
       setStatus("Loading…");
 
+      if (currentPlayerEl) {
+        currentPlayerEl.remove();
+        currentPlayerEl = null;
+      }
+
       try {
         const ruffle = window.RufflePlayer.newest();
         const player = ruffle.createPlayer();
         player.id = "player";
         stageWrapperEl.appendChild(player);
+        currentPlayerEl = player;
 
         player
           .load({
@@ -399,13 +522,22 @@
               xmlNbr: "01",
               startMission: chosenMission,
               autoBattle: chosenAutoBattle,
-              ...(importedSaveText ? { importedSave: importedSaveText } : {}),
+              ...(chosenCamp ? { startCamp: chosenCamp } : {}),
+              ...(saveToUse ? { importedSave: saveToUse } : {}),
             },
             allowScriptAccess: true,
             backgroundColor: "#000000",
             // "on" = always letterbox to preserve aspect ratio (never stretch/
             // distort), matching the fixed 4:3 stage-wrapper above.
             letterbox: "on",
+            // SpiderRider_2_edited.swf's native rate is 30fps (verified by
+            // parsing the SWF header). Ruffle only has one movie clock shared
+            // by every loaded SWF (missions, battleSystem, etc. all run under
+            // the same player instance), so overriding it here doubles
+            // everything at once with no AS patch needed - and it applies to
+            // every screen (walking around a mission, menus, battle) since
+            // they're all driven by that one clock.
+            ...(speedDoubled ? { frameRate: 60 } : {}),
           })
           .then(() => setStatus(""))
           .catch((e) => {
@@ -418,7 +550,62 @@
       }
     };
 
-    startButtonEl.addEventListener("click", startGame);
+    startButtonEl.addEventListener("click", () => launchPlayer(importedSaveText));
+
+    const updateSpeedToggleUi = () => {
+      speedToggleButtonEl.textContent = "2x Speed: " + (speedDoubled ? "On" : "Off");
+      speedToggleButtonEl.classList.toggle("active", speedDoubled);
+    };
+    updateSpeedToggleUi();
+
+    speedToggleButtonEl.addEventListener("click", () => {
+      speedDoubled = !speedDoubled;
+      updateSpeedToggleUi();
+
+      if (!currentPlayerEl) {
+        // Still on the mission-select screen - nothing running yet, so just
+        // remember the choice for the Start Game click.
+        return;
+      }
+
+      // A player is already running: the only way to change its frame rate
+      // is to rebuild it from scratch (see the note by `speedDoubled`
+      // above), so carry the game forward on the latest autosave rather than
+      // dropping the player back to blank stats. `latestSave` only updates
+      // every ~5s (frame_10/DoAction.as's autoSaveTick interval - see
+      // README), so this can rewind up to that much unsaved progress, and it
+      // can't restore an in-progress battle or exact map position (the
+      // autosave only tracks victory points/mission/gils/name/cards, not
+      // battle state) - the mission itself restarts at its entry point.
+      speedToggleNoteEl.textContent = latestSave
+        ? "Reloading from last autosave (up to ~5s of progress may rewind)…"
+        : "Reloading - no autosave yet, so this restarts the current mission from scratch…";
+      launchPlayer(latestSave || null);
+      setTimeout(() => { speedToggleNoteEl.textContent = ""; }, 4000);
+    });
+
+    const updateAutoBattleToggleUi = () => {
+      autoBattleToggleButtonEl.textContent = "Auto-battle: " + (autoBattleOn ? "On" : "Off");
+      autoBattleToggleButtonEl.classList.toggle("active", autoBattleOn);
+    };
+    updateAutoBattleToggleUi();
+
+    autoBattleToggleButtonEl.addEventListener("click", () => {
+      autoBattleOn = !autoBattleOn;
+      updateAutoBattleToggleUi();
+
+      if (!currentPlayerEl) {
+        return;
+      }
+
+      // Same rebuild-and-carry-forward-on-autosave story as the speed
+      // toggle above - see its comment for the exact tradeoffs.
+      speedToggleNoteEl.textContent = latestSave
+        ? "Reloading from last autosave (up to ~5s of progress may rewind)…"
+        : "Reloading - no autosave yet, so this restarts the current mission from scratch…";
+      launchPlayer(latestSave || null);
+      setTimeout(() => { speedToggleNoteEl.textContent = ""; }, 4000);
+    });
   });
 </script>
 <script src="ruffle-vendor/ruffle.js"></script>
