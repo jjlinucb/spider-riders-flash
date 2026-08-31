@@ -314,39 +314,61 @@ speed) with no SWF patch involved at all.
   `battleSystem_2.orig.swf` is the pre-session backup (predates this and
   every other `battleSystem_2.swf` patch this session).
 
-- **Buguese boss fight**: added as a new mission-select entry, "Buguese
-  (Boss Fight)" (`index.html`'s dropdown → a `startBuguese` FlashVar, same
-  pattern as the bonus missions). Buguese (monster id `605`, a "Mantis Squad"
-  encounter) was previously only reachable through the game's dead
-  multiplayer world hub (`decompiled/world/`) — there's no single-player
-  story mission that fights them. `frame_54`'s dispatcher gets a new branch,
-  checked before the existing camp/mission dispatch: gears the player via
-  the existing `gearUpForMission(15)` + `grantAllCards()` (so this doesn't
-  wipe out a fresh character), sets `root.inWorld = true` (the stat table
-  at `DoAction_3.as:94-111` branches on `inWorld||inCamp` — `true` selects
-  the harder/tankier Dice:18/Defence:20/Life:45 variant the real world-hub
-  encounter used, over the milder 24/20/30 fallback other single-player
-  fights get), builds `ennemyStats` with `type:605` and the same
-  `bugueseDeck` card list the original game used
-  (`decompiled/world/script/scripts/frame_2/DoAction.as:1171`), and calls
-  `root.battleSystem.initBattle(...)` directly — no new SWF frames inserted
-  anywhere, everything rides the shell's existing frame_54 label. A short
-  `setInterval` poll waits for `root.battleSystem.initBattle` to exist
-  before firing (the battle module loads asynchronously at shell frame 18;
-  every *shipped* mission trigger gets this for free via an extra
-  mission-SWF load + walking into a trigger zone, a buffer this direct
-  trigger doesn't have without the poll). `CallbackEndBattle` awards the
-  fight's own `VictoryPoint` (400, from the monster table, not hardcoded)
-  on a win, then clears the flag and re-enters `frame_54` — which falls
-  through to the player's normal mission dispatch, so win or lose (or
-  retreat) drops you back into wherever you actually were.
+- **Boss fights (Buguese, Magma, Stag, Prince Lumens)**: four new
+  mission-select entries, "*Name* (Boss Fight)" (`index.html`'s dropdown →
+  a `BOSS_FIGHTS` map of value → `{label, flashVar}`, each riding its own
+  `startX` FlashVar into the shell, same pattern as the bonus missions).
+  All four were previously only reachable through the game's dead
+  multiplayer world hub (`decompiled/world/`) — none of them have a
+  single-player story mission. `frame_10/DoAction.as` gets a new shared
+  `startBossFight(bossType, bossCard)` helper (added alongside
+  `grantAllCards()`/`gearUpForMission()`): gears the player
+  (`gearUpForMission(15)` + `grantAllCards()`, so this doesn't wipe out a
+  fresh character), sets `root.inWorld = true` (the stat tables in
+  `DoAction_3.as` branch on `inWorld` — for Buguese/Stag specifically it's
+  `inWorld||inCamp` — `true` consistently selects the harder/tankier
+  world-hub variant over the milder single-player fallback, where one
+  exists), builds `ennemyStats` with the given `type`/`card`, and calls
+  `root.battleSystem.initBattle(...)` directly with the same
+  `setInterval` readiness-poll and `CallbackEndBattle` win/lose handling
+  Buguese's original patch used. `frame_54`'s dispatcher gets one `else if`
+  branch per boss, each just clearing its flag and calling
+  `startBossFight(type, card)` — no new SWF frames inserted anywhere for
+  any of the four. Per-boss specifics:
+  - **Buguese** (id `605`, `TableEncounterMantisSqad[5]`): Dice 18/Defence
+    20/Life 45/400 victory points, `bugueseDeck` — same as before, now
+    routed through the shared helper.
+  - **Magma** (id `502`, `TableEncounterSpiderRider[2]`,
+    `DoAction_3.as:79-92`): Dice 16/Defence 10/Life 20/150 victory points
+    (both branches are identical for Magma — no hard/mild split), real
+    `magmaDeck` from `decompiled/world/script/scripts/frame_2/DoAction.as:1176`.
+    Notably a much lower-tier fight than Buguese; that's the real data, left
+    as-is rather than inflated.
+  - **Stag** (id `604`, `TableEncounterMantisSqad[4]`,
+    `DoAction_3.as:94-109`): Dice 16/Defence 15/Life 40/270 victory points
+    (harder `inWorld||inCamp` branch), real `stagDeck` from
+    `decompiled/world/script/scripts/frame_2/DoAction.as:1177`.
+  - **Prince Lumens** (id `503`, `TableEncounterSpiderRider[3]`,
+    `DoAction_3.as:79-92`): Dice 15/Defence 15/Life 30/140 victory points
+    (harder `inWorld` branch). Unlike the other three, Lumens has **no**
+    real NPC object or card deck anywhere in the decompiled tree — confirmed
+    genuinely cut/unfinished content, not a lookup miss. Since he's
+    otherwise the weakest of the four on raw stats, he was given an
+    invented 22-card deck (`106,106,110,204,205,208,208,301,300,508,508,
+    508,508,509,509,510,510,511,511,507,506,504` — two Elite Plate Armor,
+    two Arachna Power, leaning into the same high-cost weapon/shield/boost
+    mix Magma and Buguese's real decks favor) so he plays as a comparably
+    tough boss instead of a pushover, rather than leaving him without a
+    deck at all.
 
-**Shield Master and Buguese were confirmed with an actual live playthrough** —
-see the verification note below. **Mission-select's `grantAllCards()` addition
-was not** — same clean-diff verification as everything else, and it's one line
-that reuses `grantAllCards()` itself (already proven live-working for camps and
-for Buguese, in the same build), but repeated attempts to click through a
-normal mission-select launch this round stalled on Ruffle's own preloader
+**Shield Master and the original Buguese fight were confirmed with an actual
+live playthrough** — see the verification note below. **Everything in this
+round — mission-select's `grantAllCards()` addition, and all three new boss
+fights (Magma/Stag/Lumens) plus the `startBossFight()` refactor — was not.**
+Same clean-diff verification as everything else, and `startBossFight()`
+reuses the exact mechanism already proven live-working for Buguese, just
+parameterized — but repeated attempts to click through a normal
+mission-select or boss-fight launch this round stalled on Ruffle's own preloader
 animation before even reaching the login screen, with no console errors — see
 below, this looks like the pre-existing AVM1 flakiness resurfacing, not a
 regression, but it's genuinely unconfirmed by an actual playthrough this time.
@@ -377,30 +399,22 @@ success as proof the sandbox issue is gone.
 
 A survey for other "Buguese-style" content — stuff fully coded but gated
 behind something permanently broken (dead server, expired promo) or
-multiplayer-only — turned up, in rough order of how clean a follow-up unlock
-would be:
+multiplayer-only — turned up the below. **Magma, Stag, and Prince Lumens are
+now built** (see the boss fights entry above) — kept here for the record of
+what was found and why each call was made:
 
-- **Magma (id 502) and Stag (id 604)**: two more world-hub-only monster
-  encounters with complete stat entries *and* complete card decks
-  (`magmaDeck`/`stagDeck` in `decompiled/world/script/scripts/frame_2/DoAction.as`)
-  that, like Buguese, are never triggered by any single-player mission or camp.
-  Same unlock shape as Buguese — a mission-select entry + a `frame_54` branch
-  each.
 - **`BATTLESYSTEM_DEBUG` test harness** (`battleSystem/scripts/frame_1/DoAction.as:34-97`):
   hardcoded off, but if forced on it self-populates a standalone battle
   against a preset player vs. whatever `FromEngineOpponent.type` is set to —
   i.e. a general "fight any encounter-table id directly" dev tool, not just
   one boss. More general-purpose than adding fights one at a time, if that's
-  useful.
+  useful. Not built.
 - **`rewardAccess` flag** (`SpiderRider/.../frame_1:99` +
   `frame_4/PlaceObject2_333_1662`): defaults false; a dead validation pattern
   like the old webcode lock. If forced true, four world-hub minigame events
   grant bonus collectibles instead of just gold — but this only matters if
   the world hub itself gets unlocked (see below), so lower priority alone.
-- **Prince Lumens (id 503)**: stats exist in the encounter table but no NPC
-  object or card deck anywhere — genuinely unfinished content, would need
-  invented assets rather than just wiring up what's already there. Riskier,
-  not recommended.
+  Not built.
 - **The full world hub** (`world_2.swf`, plus `miniGame1_2.swf`–`miniGame6_2.swf`
   and `battleMulti_2.swf`, all present on disk): everything above only reuses
   the *battle* module standalone, same as Buguese. Unlocking the hub itself —

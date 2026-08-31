@@ -459,6 +459,13 @@
       });
     });
 
+    const BOSS_FIGHTS = {
+      buguese: { label: "Buguese", flashVar: "startBuguese" },
+      magma: { label: "Magma", flashVar: "startMagma" },
+      stag: { label: "Stag", flashVar: "startStag" },
+      lumens: { label: "Prince Lumens", flashVar: "startLumens" },
+    };
+
     // Populate the mission dropdown: Mission 1 .. Mission 15, default = 1,
     // plus the 3 bonus "camp" missions. Camp values are prefixed "camp" so
     // launchPlayer can tell them apart from a plain mission number - they
@@ -480,10 +487,14 @@
       opt.textContent = "Bonus Mission " + i;
       missionSelectEl.appendChild(opt);
     }
-    {
+    // Standalone boss fights, previously only reachable through the dead
+    // multiplayer world hub - each rides its own startX FlashVar into a
+    // frame_54 branch that calls startBossFight() directly (see frame_10/
+    // DoAction.as). BOSS_FIGHTS maps dropdown value -> {label, flashVar}.
+    for (const [value, { label }] of Object.entries(BOSS_FIGHTS)) {
       const opt = document.createElement("option");
-      opt.value = "buguese";
-      opt.textContent = "Buguese (Boss Fight)";
+      opt.value = value;
+      opt.textContent = label + " (Boss Fight)";
       missionSelectEl.appendChild(opt);
     }
 
@@ -499,7 +510,7 @@
     const launchPlayer = (saveToUse) => {
       const selectedValue = missionSelectEl.value;
       const chosenCamp = selectedValue.indexOf("camp") === 0 ? selectedValue.slice(4) : null;
-      const chosenBuguese = selectedValue === "buguese";
+      const chosenBossFlashVar = BOSS_FIGHTS[selectedValue] ? BOSS_FIGHTS[selectedValue].flashVar : null;
       const chosenMission = String(parseInt(selectedValue, 10) || 1);
       const chosenAutoBattle = String(autoBattleOn);
 
@@ -530,7 +541,7 @@
               startMission: chosenMission,
               autoBattle: chosenAutoBattle,
               ...(chosenCamp ? { startCamp: chosenCamp } : {}),
-              ...(chosenBuguese ? { startBuguese: "1" } : {}),
+              ...(chosenBossFlashVar ? { [chosenBossFlashVar]: "1" } : {}),
               ...(saveToUse ? { importedSave: saveToUse } : {}),
             },
             allowScriptAccess: true,
