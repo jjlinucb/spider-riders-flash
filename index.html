@@ -480,6 +480,12 @@
       opt.textContent = "Bonus Mission " + i;
       missionSelectEl.appendChild(opt);
     }
+    {
+      const opt = document.createElement("option");
+      opt.value = "buguese";
+      opt.textContent = "Buguese (Boss Fight)";
+      missionSelectEl.appendChild(opt);
+    }
 
     const setStatus = (msg, isError) => {
       statusEl.textContent = msg;
@@ -493,6 +499,7 @@
     const launchPlayer = (saveToUse) => {
       const selectedValue = missionSelectEl.value;
       const chosenCamp = selectedValue.indexOf("camp") === 0 ? selectedValue.slice(4) : null;
+      const chosenBuguese = selectedValue === "buguese";
       const chosenMission = String(parseInt(selectedValue, 10) || 1);
       const chosenAutoBattle = String(autoBattleOn);
 
@@ -523,6 +530,7 @@
               startMission: chosenMission,
               autoBattle: chosenAutoBattle,
               ...(chosenCamp ? { startCamp: chosenCamp } : {}),
+              ...(chosenBuguese ? { startBuguese: "1" } : {}),
               ...(saveToUse ? { importedSave: saveToUse } : {}),
             },
             allowScriptAccess: true,

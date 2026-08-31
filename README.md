@@ -4,7 +4,7 @@ The original 2007 Flash browser game, recovered and running fully client-side vi
 [Ruffle](https://ruffle.rs) (an open-source Flash Player emulator) — no backend
 server required.
 
-**Live version:** https://jjlinucb.itch.io/spiderriders
+**Live version:** https://flash-source.vercel.app
 
 ## Why this works with no server
 
@@ -31,7 +31,14 @@ speed) with no SWF patch involved at all.
 - **Mission select**: a "choose a mission" screen in `index.html` before Ruffle
   boots, passed through as a `startMission` FlashVar. See the comment block at the
   top of `index.html` for the exact patch location
-  (`SpiderRider_2_edited.swf`, `frame_10/DoAction.as`).
+  (`SpiderRider_2_edited.swf`, `frame_10/DoAction.as`). As of this patch, picking
+  *any* mission (1-15, not just gear-gated ones) also calls the existing
+  `grantAllCards()` — previously only bonus camps and the Buguese fight got the
+  full 61-card pool; `gearUpForMission()`'s own curated per-mission-threshold
+  card list only ever covered a subset. One line added inside the existing
+  `if(startMission != undefined)` block; `grantAllCards()`'s `hasCard()` guard
+  means calling it twice (once here, once more if a camp/Buguese flag is also
+  set) is harmless.
 - **Auto-battle**: a floating toggle button (top-right, same always-visible/
   works-anytime pattern as 2x speed below — flipping it mid-game rebuilds the
   player and carries progress forward on the latest autosave, for the same
@@ -276,22 +283,130 @@ speed) with no SWF patch involved at all.
   than trying to jump there early and risk skipping the shell's preloader/
   login frames.
 
-**None of the above has been confirmed with a live playthrough** — the
-sandbox this was built in can't get Ruffle's AVM1 loop to actually run: `document.visibilityState`
-is stuck `"hidden"` (a similar issue to one hit earlier in this project on the Phaser
-side, but Ruffle exposes no `headlessStep`-style manual-tick escape hatch to work
-around it, and neither `suspend()`/`resume()` nor `backgroundExecutionMode: "worker"`
-freed it up). This blocks *all* AVM1 execution in that sandbox, old code and new
-alike, not just these two patches specifically — even the pre-existing autosave-free
-build would look identically stuck there. What *was* verified without needing the
-loop to run: both patches export/reimport byte-clean, the SWF loads to 100% in
-Ruffle with no console errors under several configs, and FlashVars/config
-(`autoBattle`, `importedSave`) carry the right values all the way into Ruffle's
-`loadedConfig` — plus, since it's plain JS unaffected by the AVM1 stall, the save
-file picker's own validate/accept/reject logic in `index.html` was exercised
-directly and works. But nobody has watched dice roll on their own, or watched a
-save file actually round-trip through a real playthrough, yet. Worth a real-browser
-check before relying on either.
+- **Shield Master fix**: reported as "this doesn't work" (screenshot from a
+  bonus mission) for the sibling **Rider Master** card. Investigating the
+  whole "Master" card family (`battleSystem_2.swf`,
+  `DefineSprite_3152/frame_1/DoAction_3.as`'s `TableCardBattleAction`, plus
+  the two stat-panel clips `PlaceObject2_2941_394` (player) and
+  `PlaceObject2_2966_441` (opponent) that consume the one-shot flags) against
+  the actual localized card text in `sprSettings01_EN.xml` found the "fix all
+  5" framing from earlier in this session was too broad: **Weapon Master**,
+  **Boost Blaze**, and **Light of the Oracle** describe converting dice
+  *already rolled this turn* — the existing one-shot-at-play-time code
+  matches that description exactly and needed no change. Only two cards
+  describe a forward-looking, card-type-triggered aura ("**All** weapon
+  Equipment card give you +2 damage" / "**Shield** Equipment card give you +2
+  defense"), and only **Shield Master** was actually broken in code: the
+  opponent-side clip cleared the wrong flag (`riderMasterEq` instead of
+  `shldMasterEq` — a copy-paste bug) and added its bonus to `DiceRed` (an
+  *attack* pool) instead of defense; the player-side clip's Shield Master
+  block did nothing at all (dead code, no bonus applied). Rider Master
+  itself was already working as coded — `DiceRed += WeaponInGame() * 2` is
+  correct — though it only counts weapon cards already in play at the moment
+  Rider Master resolves, not ones added afterward, which can make it feel
+  like nothing happened if few/no other weapons are out yet; that's the
+  original one-shot design, not a bug, and was left alone. Fixed both clips'
+  Shield Master block to clear `shldMasterEq` and apply
+  `ShieldInGame() * 2` to `DefendMalusPlayer`/`DefendMalusOpponent`
+  (subtracting from the existing malus pool — confirmed as a legitimate
+  defense-bonus channel by cross-referencing the "Shadow" debuff card, which
+  already nudges the same variable the other direction).
+  `battleSystem_2.orig.swf` is the pre-session backup (predates this and
+  every other `battleSystem_2.swf` patch this session).
+
+- **Buguese boss fight**: added as a new mission-select entry, "Buguese
+  (Boss Fight)" (`index.html`'s dropdown → a `startBuguese` FlashVar, same
+  pattern as the bonus missions). Buguese (monster id `605`, a "Mantis Squad"
+  encounter) was previously only reachable through the game's dead
+  multiplayer world hub (`decompiled/world/`) — there's no single-player
+  story mission that fights them. `frame_54`'s dispatcher gets a new branch,
+  checked before the existing camp/mission dispatch: gears the player via
+  the existing `gearUpForMission(15)` + `grantAllCards()` (so this doesn't
+  wipe out a fresh character), sets `root.inWorld = true` (the stat table
+  at `DoAction_3.as:94-111` branches on `inWorld||inCamp` — `true` selects
+  the harder/tankier Dice:18/Defence:20/Life:45 variant the real world-hub
+  encounter used, over the milder 24/20/30 fallback other single-player
+  fights get), builds `ennemyStats` with `type:605` and the same
+  `bugueseDeck` card list the original game used
+  (`decompiled/world/script/scripts/frame_2/DoAction.as:1171`), and calls
+  `root.battleSystem.initBattle(...)` directly — no new SWF frames inserted
+  anywhere, everything rides the shell's existing frame_54 label. A short
+  `setInterval` poll waits for `root.battleSystem.initBattle` to exist
+  before firing (the battle module loads asynchronously at shell frame 18;
+  every *shipped* mission trigger gets this for free via an extra
+  mission-SWF load + walking into a trigger zone, a buffer this direct
+  trigger doesn't have without the poll). `CallbackEndBattle` awards the
+  fight's own `VictoryPoint` (400, from the monster table, not hardcoded)
+  on a win, then clears the flag and re-enters `frame_54` — which falls
+  through to the player's normal mission dispatch, so win or lose (or
+  retreat) drops you back into wherever you actually were.
+
+**Shield Master and Buguese were confirmed with an actual live playthrough** —
+see the verification note below. **Mission-select's `grantAllCards()` addition
+was not** — same clean-diff verification as everything else, and it's one line
+that reuses `grantAllCards()` itself (already proven live-working for camps and
+for Buguese, in the same build), but repeated attempts to click through a
+normal mission-select launch this round stalled on Ruffle's own preloader
+animation before even reaching the login screen, with no console errors — see
+below, this looks like the pre-existing AVM1 flakiness resurfacing, not a
+regression, but it's genuinely unconfirmed by an actual playthrough this time.
+
+**Everything else has not been confirmed with a live playthrough.**
+Earlier attempts this session assumed the sandbox couldn't get Ruffle's AVM1
+loop to run at all (`document.visibilityState` stuck `"hidden"` under whatever
+setup was tried then). The Shield Master / Buguese verification turned out to
+be the first time this session actually got past the login screen — served
+over `http(s)`, not `file://` (browsers block WASM/fetch on `file://`
+regardless), and clicking through with *any* non-blank username/password (see
+"Why this works with no server" above — `callScriptEnable` is permanently
+`false`, so login always no-ops and succeeds). Once past that, AVM1 ran
+completely normally that time: dice actually rolled, damage actually applied
+to the HUD, new cards actually got drawn into the deck, and the Buguese fight
+rendered with correct art, the correct harder stat branch, and a geared-up
+player, all matching what the code predicted. But it isn't reliably
+reproducible on demand — the very next attempt (mission-select, above)
+stalled before even reaching login, across multiple fresh tabs and waits over
+10s. So the earlier "AVM1 won't run here" belief looks like real, still-
+unresolved intermittent flakiness in this sandbox (possibly tied to
+`requestAnimationFrame` throttling on a backgrounded/non-visible tab), not
+something reliably worth depending on — worth retrying against the *other*
+patches in this list, but don't be surprised if it stalls, and don't treat one
+success as proof the sandbox issue is gone.
+
+## Other gated content found but not yet unlocked
+
+A survey for other "Buguese-style" content — stuff fully coded but gated
+behind something permanently broken (dead server, expired promo) or
+multiplayer-only — turned up, in rough order of how clean a follow-up unlock
+would be:
+
+- **Magma (id 502) and Stag (id 604)**: two more world-hub-only monster
+  encounters with complete stat entries *and* complete card decks
+  (`magmaDeck`/`stagDeck` in `decompiled/world/script/scripts/frame_2/DoAction.as`)
+  that, like Buguese, are never triggered by any single-player mission or camp.
+  Same unlock shape as Buguese — a mission-select entry + a `frame_54` branch
+  each.
+- **`BATTLESYSTEM_DEBUG` test harness** (`battleSystem/scripts/frame_1/DoAction.as:34-97`):
+  hardcoded off, but if forced on it self-populates a standalone battle
+  against a preset player vs. whatever `FromEngineOpponent.type` is set to —
+  i.e. a general "fight any encounter-table id directly" dev tool, not just
+  one boss. More general-purpose than adding fights one at a time, if that's
+  useful.
+- **`rewardAccess` flag** (`SpiderRider/.../frame_1:99` +
+  `frame_4/PlaceObject2_333_1662`): defaults false; a dead validation pattern
+  like the old webcode lock. If forced true, four world-hub minigame events
+  grant bonus collectibles instead of just gold — but this only matters if
+  the world hub itself gets unlocked (see below), so lower priority alone.
+- **Prince Lumens (id 503)**: stats exist in the encounter table but no NPC
+  object or card deck anywhere — genuinely unfinished content, would need
+  invented assets rather than just wiring up what's already there. Riskier,
+  not recommended.
+- **The full world hub** (`world_2.swf`, plus `miniGame1_2.swf`–`miniGame6_2.swf`
+  and `battleMulti_2.swf`, all present on disk): everything above only reuses
+  the *battle* module standalone, same as Buguese. Unlocking the hub itself —
+  chat, trading, real-time PvP dueling, minigames — is a much bigger project;
+  it depends on systems that were built assuming a live server and were never
+  designed to run offline.
 
 ## Running locally
 
