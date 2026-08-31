@@ -511,6 +511,62 @@ success as proof the sandbox issue is gone.
   backend has no documented fixed key-naming scheme, so it matches on the
   literal SharedObject name rather than guessing Ruffle's prefix format) and
   reports how many keys it cleared. Pure JS, no SWF patch.
+- **In-game boss/bonus-mission menu**: previously the only way to reach the 4
+  boss fights or 3 bonus missions was the pre-boot HTML dropdown. Investigated
+  whether an in-game "world map" screen exists to attach new hotspots to — it
+  doesn't; single-player has no walkable hub, just mission-select → a
+  background preload chain (guild/chat/multiplayer-hub preload, unrelated to
+  the player) → straight into whatever was picked. So instead of inventing a
+  fake screen, added a runtime-drawn overlay (`createEmptyMovieClip` +
+  drawing API + dynamic `TextField`s, no new `DefineButton2`/`PlaceObject2`
+  tags) inside the existing in-game character/options window
+  (`root.charWindow`, opened by the same HUD button players already use).
+  Lists all 4 bosses and 3 bonus missions, each calling the exact same
+  `startBossFight(bossType, bossCard)` / camp-trigger code the dropdown uses
+  (args copied verbatim from `frame_54/DoAction.as`'s dispatch table, so
+  behavior is identical either way). `frame_10/PlaceObject2_1865_201/
+  CLIPACTIONRECORD onClipEvent(load).as` — isolated diff, only this file
+  changed.
+- **`playerStats.gils` was `NaN` in every save.** Fresh saves never
+  initialized it; the first gold reward anywhere (`addGils()`,
+  `frame_2/DoAction.as:412`) computed `Number(undefined) + Number(amount)` =
+  `NaN`, permanently baked into the save from that point on (`Array.join`
+  renders `undefined` as `""`, but `NaN.toString()` is literally `"NaN"` —
+  that's what showed up in a downloaded save). Fixed by adding
+  `playerStats.gils = 0;` to the fresh-save init block in `frame_10/
+  DoAction.as`. One-line isolated diff.
+- **Default player name changed from `""` to `"Hunter"`** (`frame_10/
+  DoAction.as`) — cosmetic, requested directly. `Name` only ever gets a real
+  value through the character-creation flow, which the mission-select
+  shortcut skips entirely, so it was always blank for any session started
+  that way.
+- **Mission-1 tutorial popup misfiring for boss fights and bonus missions.**
+  `index.html` always sends a `startMission` FlashVar (falling back to `"1"`
+  for boss/camp picks via `parseInt(NaN)||1`), and neither `startBossFight()`
+  nor the camp dispatch branch (`frame_54/DoAction.as`) ever updated
+  `playerStats.mission` away from that stuck default — so on a fresh save,
+  `playerStats.mission` stayed `1` forever for any shortcut-started session.
+  The battle module's tutorial gate (`battleSystem/frame_1/DoAction.as`'s
+  `initBattle()`) fires `showTutorial=true` specifically when
+  `playerStats.mission==1` — hence the first-battle-only "To throw the dice,
+  click..." popup reappearing every time. (It's masked for boss fights
+  specifically because `startBossFight()` also sets `root.inWorld=true`,
+  which independently short-circuits the same gate — bonus missions never
+  set that flag, so they were the ones actually showing the popup.) Fixed by
+  setting `root.playerStats.mission = 15` in both `startBossFight()` and the
+  camp dispatch branch — two one-line additions, isolated diff confirmed
+  across both files.
+- **Card-hand size: corrected a wrong assumption from earlier this session.**
+  Previously assumed the battle hand should show ~21 cards (everything
+  costing 1500g+). That's wrong — the game caps hand size at
+  `min(deckPool.length, 7)` by design (`battleSystem/DefineSprite_3152/
+  frame_1/DoAction_9.as`), drawing randomly without replacement from the
+  eligible pool, same as any normal card game. **Still unresolved**: why the
+  eligible pool itself (`Player.CardDeck`) was only 1-2 cards at battle start
+  in live testing, when save data confirms ~20 cards should qualify for the
+  active deck. Static tracing didn't find the cause — needs a live runtime
+  trace (`trace()` instrumentation + reading Ruffle's console output) as the
+  next step.
 
 ## Other gated content found but not yet unlocked
 
