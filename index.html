@@ -551,6 +551,9 @@
         const ruffle = window.RufflePlayer.newest();
         const player = ruffle.createPlayer();
         player.id = "player";
+        // Start muted - the in-game speaker icon (top right of the stage)
+        // still toggles it back on, this only changes the default.
+        player.volume = 0;
         stageWrapperEl.appendChild(player);
         currentPlayerEl = player;
 

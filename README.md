@@ -561,12 +561,51 @@ success as proof the sandbox issue is gone.
   costing 1500g+). That's wrong — the game caps hand size at
   `min(deckPool.length, 7)` by design (`battleSystem/DefineSprite_3152/
   frame_1/DoAction_9.as`), drawing randomly without replacement from the
-  eligible pool, same as any normal card game. **Still unresolved**: why the
-  eligible pool itself (`Player.CardDeck`) was only 1-2 cards at battle start
-  in live testing, when save data confirms ~20 cards should qualify for the
-  active deck. Static tracing didn't find the cause — needs a live runtime
-  trace (`trace()` instrumentation + reading Ruffle's console output) as the
-  next step.
+  eligible pool, same as any normal card game.
+- **Root cause of the near-empty `Player.CardDeck` found and fixed:
+  `deckActive` defaulted to the most restrictive tier.** Live testing (a
+  boss fight, then independently a real mission-3 battle) showed 0-1 cards
+  in hand, with the occasional card (e.g. the 3000g "Lightning bolt")
+  flickering in then out — captured on video and confirmed frame-by-frame.
+  The "Deck A/B/C tiering by gold value" feature above (added earlier the
+  same day, before this fix) is working exactly as designed — the actual bug
+  was one line above it, `root.deckActive = "A";` (`frame_10/DoAction.as`,
+  part of the original boot sequence, unconditional on every load), which
+  selects deck **A** — the *narrowest* tier (1500g and up only) — as the
+  default. `battleSystem/DefineSprite_3152/frame_1/DoAction_6.as:124-135`
+  intersects `deckActive` against each card's `deckForCard()` bucket to
+  build `Player.CardDeck`; with `deckActive=="A"`, only cards costing
+  2000g+ or 1500g-1999g ever qualify — exactly matching "Lightning bolt
+  (3000g) flickered in" while everything else stayed empty, since most
+  granted cards are starter-tier (200g-1000g). Confirmed via `git log` that
+  this default predates the tiering feature and was never touched by it —
+  before that feature existed every card hardcoded `deck:7` (all three
+  tiers at once), so the restrictive default was harmless until the tiering
+  feature made it matter. Fixed by changing the default to deck **C** (the
+  catch-all tier — every `deckForCard()` bucket intersects it), restoring
+  "every owned card is drawable" as the out-of-the-box behavior while
+  keeping the A/B tabs (`activeDeck` clip, present on every mission/camp
+  screen) working for anyone who deliberately wants to filter down to
+  pricier cards. One-line isolated diff, `frame_10/DoAction.as`.
+- **Music starts muted by default.** `index.html` sets `player.volume = 0`
+  right after the Ruffle player element is created. The in-game speaker icon
+  (top right of the stage) still toggles it back on — this only changes
+  what a fresh page load starts with. Pure JS, no SWF patch.
+- **Instant boss fight: skip the entire preload chain from the pre-boot
+  dropdown.** Picking a boss from the HTML dropdown used to still walk
+  through the full guild/chat/multiplayer/`world_2.swf` preload sequence
+  before `startBossFight()` ever ran. Added, at the end of the existing
+  `if(!callScriptEnable){...}` boot block in `frame_10/DoAction.as`: if any
+  `root.start<Boss>` flag is set, jump straight to `gotoAndStop(54)` (the
+  dispatch frame `startBossFight()` lives on) and kick off
+  `battleSystem.loadMovie(...)` immediately, bypassing every intervening
+  frame's own load-time setup. Relies on `gotoAndStop()`'s AS2 semantics —
+  jumping forward synthesizes the intervening frames' DisplayList (so
+  everything still gets placed) without executing their DoAction scripts —
+  and on `startBossFight()`'s own `setInterval` readiness-poll for
+  `battleSystem.initBattle`, which already exists to absorb exactly this
+  kind of load-time gap. Confirmed working live (Prince Lumens loaded and
+  was playable straight from the dropdown, no preload wait).
 
 ## Other gated content found but not yet unlocked
 
