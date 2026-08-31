@@ -57,6 +57,24 @@ speed) with no SWF patch involved at all.
   same `hasCard()`-guarded non-destructive pattern as everything else, so a
   card a save already has keeps whatever `deck` value it was first granted
   with.
+
+  **Bug found and fixed right after shipping the above**: a real playtest
+  screenshot showed an almost-empty hand in an actual battle (0-1 of the ~21
+  cards that should qualify for deck A). Root cause: `cardData` (the array
+  `deckForCard()`/`findCardObj()` need to look up a card's cost) was declared
+  at the very *end* of `frame_10/DoAction.as`, but `grantAllCards()`/
+  `gearUpForMission()` get called earlier in that same frame's boot logic
+  (`index.html` always sends a `startMission` FlashVar — even for boss
+  fights, where it silently falls back to `"1"` since `parseInt("buguese")`
+  is `NaN`). So on every mission-select or boss-fight launch, cards were
+  first granted while `cardData` was still `undefined` — `findCardObj()`
+  found nothing, `deckForCard()` fell through its `undefined`-cost branch,
+  and *every* card landed on `deck:3` (C-only). The `hasCard()` guard then
+  meant nothing ever got corrected on a later call. Fixed by moving the
+  `cardData = [...]` literal to right after the function definitions, before
+  any boot logic can call the functions that depend on it — same file, no
+  new code, pure reordering (verified as a pure move: sorted line sets of
+  the before/after file are identical).
 - **Auto-battle**: a floating toggle button (top-right, same always-visible/
   works-anytime pattern as 2x speed below — flipping it mid-game rebuilds the
   player and carries progress forward on the latest autosave, for the same
@@ -413,6 +431,86 @@ unresolved intermittent flakiness in this sandbox (possibly tied to
 something reliably worth depending on — worth retrying against the *other*
 patches in this list, but don't be surprised if it stalls, and don't treat one
 success as proof the sandbox issue is gone.
+
+- **Boss-fight cosmetic armor fix**: a real playtest screenshot of the
+  Buguese fight showed the hero in plain civilian clothes despite being
+  fully geared for combat. Root cause: `typeArmor`/`typeManacle` (the
+  costume-tier variables the battle screen's `mainChar` clip reads via
+  `mainChar.typeBody = 4 + root.typeArmor` in
+  `battleSystem/scripts/frame_1/DoAction.as`'s `initBattle()`) are computed
+  in `frame_10/DoAction.as` from `playerStats.mission` *before* any boss
+  fight logic runs — and `playerStats.mission` is stuck at `1` for every
+  boss fight, for the same `parseInt("buguese")==NaN` fallback reason as
+  the card-loading bug above. `startBossFight()`'s own `gearUpForMission(15)`
+  call only buffs stats/cards/rank; it never touched the cosmetic variables.
+  Fixed by having `startBossFight()` also set `root.typeArmor`/
+  `root.typeManacle` to the same mission-15 tier it already gears everything
+  else to.
+- **`GAMEDEBUG` was backwards**: `index.html` passed the *string* `"false"`
+  as the FlashVar, intending to disable debug mode — but AS2 treats any
+  non-empty string as truthy, so every bare `if(GAMEDEBUG)`/`if(!GAMEDEBUG)`
+  check in the SWF (`SpiderRider/script/scripts/frame_1/DoAction.as` and
+  others) was actually running as if debug mode were *on* the whole time:
+  world-map debug overlay clips forced visible, analytics pings always
+  suppressed, and the game always connecting to the dev multiplayer room
+  server instead of prod. Fixed in `index.html` alone — passing `""`
+  (empty string) instead of `"false"` is falsy in AS2 while still
+  registering as "set" (so it still skips the SWF's own separate
+  "default to true if unset" fallback). No SWF patch needed. Note: a
+  battle-screen debug stat panel (event/state/mission/gils/xp fields) and
+  some "HIGHLIGHT"/"SHADER"-labeled art seen in the same screenshots could
+  not be tied to `GAMEDEBUG` or any other flag from the script-only
+  decompile — genuinely unconfirmed whether this fix also resolves those;
+  needs a fresh screenshot to check.
+- **Player always goes first**: `battleSystem/scripts/DefineSprite_3152/frame_1/DoAction_9.as`'s
+  `InitAfterDraw()` decided turn order by `Opponent.ID` — under 200 always
+  gave the player first turn, under 300 always gave the opponent first
+  turn, and *everything else* (300+, which includes every real story-mission
+  monster and all four new boss fights) was a 50/50 `Math.random()` coin
+  flip. Changed that branch to unconditionally set `CurrentPlayer =
+  TURN_PLAYER`, so the player now always acts first in every battle that
+  previously randomized it. Verified via a normalized diff (stripping
+  FFDec's arbitrary `_locN_` renumbering, which changes on every
+  recompile even in completely untouched functions elsewhere in the same
+  file) down to exactly the one intended line plus one unrelated, provably
+  equivalent cosmetic rewrite (`x = x + 1` re-rendered as `x += 1`) — cross-
+  checked against raw P-code to confirm no logic was dropped, consistent
+  with this project's established "don't trust the plain decompile alone"
+  practice.
+- **The armor fix above got silently reverted, then re-fixed.** A follow-up
+  playtest screenshot showed the hero back in civilian clothes with *no*
+  further code changes in between — a real regression, not flakiness. Two
+  agent investigations later: the first traced the actual DisplayList and
+  found the battle module's costume-selector clips (`DefineSprite_1571`,
+  `_1927`, and ~30-odd siblings, one pair per combat pose: idle/attack/hurt/
+  win/etc.) are *not* one-shot — the pose controller
+  (`DefineSprite_3152/frame_1/DoAction_9.as`) calls
+  `AnimPlayer.Avatar.gotoAndStop(state)` on every single turn action, and
+  since each pose is a non-"move" `PlaceObject2` placement, Flash fully
+  reconstructs it (and re-runs its `gotoAndStop(mainChar.typeBody)` one-liner)
+  every time. So the armor mechanism was never structurally broken — it just
+  needed `root.typeArmor` to actually hold the right value when a pose
+  rendered. Direct re-export of the *live* SWF (not a cached decompile)
+  confirmed why it didn't: `startBossFight()` no longer contained the
+  `root.typeArmor = 28` / `root.typeManacle` lines from the original fix.
+  They were lost when the **card-order fix** (above) reimported a whole
+  rebuilt `frame_10/DoAction.as` — that edit was built by slicing an export
+  that predated the armor fix, so re-importing it silently reverted armor
+  while keeping the card fix. **Lesson for this project**: when two patches
+  touch the *same* decompiled file in the same session, each one needs a
+  fresh export of the *currently-live* SWF immediately before editing —
+  never reuse an earlier round's intermediate export, even from minutes
+  earlier. Re-applied the two lines against a freshly-exported current copy,
+  verified via isolated diff (`142a143,144`, nothing else in the 808-file
+  export changed), redeployed, MD5-confirmed.
+- **"Clear autosave & start fresh" button** (`index.html`): added to rule out
+  a stale-save explanation for the card-hand bug — `SharedObject.getLocal
+  ("spiderSo")` (`frame_1/DoAction.as:14`) persists across every server-side
+  fix, and `hasCard()` never revisits a card a save already owns. The button
+  clears any `localStorage` key containing `"spiderSo"` (Ruffle's web
+  backend has no documented fixed key-naming scheme, so it matches on the
+  literal SharedObject name rather than guessing Ruffle's prefix format) and
+  reports how many keys it cleared. Pure JS, no SWF patch.
 
 ## Other gated content found but not yet unlocked
 

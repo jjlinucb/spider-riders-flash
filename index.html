@@ -360,6 +360,7 @@
     <input id="save-file-input" type="file" accept=".txt,.sav,text/plain" />
   </div>
   <button id="download-save-button" type="button" disabled>Download current save</button>
+  <button id="clear-autosave-button" type="button">Clear autosave &amp; start fresh</button>
   <span id="save-status"></span>
 </div>
 
@@ -387,6 +388,7 @@
     const startButtonEl = document.getElementById("start-button");
     const saveFileInputEl = document.getElementById("save-file-input");
     const downloadSaveButtonEl = document.getElementById("download-save-button");
+    const clearAutosaveButtonEl = document.getElementById("clear-autosave-button");
     const saveStatusEl = document.getElementById("save-status");
     const speedToggleButtonEl = document.getElementById("speed-toggle-button");
     const speedToggleNoteEl = document.getElementById("speed-toggle-note");
@@ -442,6 +444,27 @@
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
+    });
+
+    clearAutosaveButtonEl.addEventListener("click", () => {
+      // Ruffle emulates Flash's SharedObject.getLocal("spiderSo")
+      // (frame_1/DoAction.as:14) via the browser's localStorage. There's no
+      // documented fixed key format for Ruffle's web backend, so match any
+      // key containing the shared-object name literally rather than
+      // guessing its exact prefix/path scheme.
+      const matches = [];
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (key && key.includes("spiderSo")) {
+          matches.push(key);
+        }
+      }
+      matches.forEach((key) => localStorage.removeItem(key));
+
+      saveStatusEl.textContent =
+        matches.length > 0
+          ? `Cleared ${matches.length} autosave key(s) - next launch starts fresh.`
+          : "No autosave found in this browser (nothing to clear).";
     });
 
     saveFileInputEl.addEventListener("change", () => {
@@ -536,7 +559,16 @@
             url: "SpiderRider_2_edited.swf",
             parameters: {
               userLang: "EN",
-              GAMEDEBUG: "false",
+              // AS2 treats any non-empty string as truthy, so passing the
+              // literal string "false" here actually left every bare
+              // if(GAMEDEBUG) check in the SWF running in debug mode - the
+              // opposite of intent (confirmed: world-map debug overlays
+              // always rendering, analytics always suppressed, always
+              // connecting to the dev multiplayer room server). An empty
+              // string is falsy in AS2 while still != undefined, so it
+              // correctly skips the SWF's own "default to true if unset"
+              // fallback and resolves every downstream check to false.
+              GAMEDEBUG: "",
               xmlNbr: "01",
               startMission: chosenMission,
               autoBattle: chosenAutoBattle,
