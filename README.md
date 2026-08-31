@@ -39,6 +39,24 @@ speed) with no SWF patch involved at all.
   `if(startMission != undefined)` block; `grantAllCards()`'s `hasCard()` guard
   means calling it twice (once here, once more if a camp/Buguese flag is also
   set) is harmless.
+- **Deck A/B/C tiering by gold value**: every card a player is granted (via
+  `grantAllCards()`, `gearUpForMission()`'s curated list, or any of the four
+  boss fights' gearing) used to hardcode `deck:7` — "always active regardless
+  of which of decks A/B/C is selected" (the meaning of `deck` values 1-7 was
+  reverse-engineered from `battleSystem/scripts/DefineSprite_3152/frame_1/DoAction_6.as:124-135`:
+  `1`=A only, `2`=B only, `3`=C only, `4`=A+B, `5`=A+C, `6`=B+C, `7`=all
+  three). A new `deckForCard(cardId)` in `frame_10/DoAction.as` (right after
+  `hasCard()`) looks the card's real shop price up via the existing
+  `findCardObj()`, strips the trailing `g`, and buckets it: deck **C** always
+  gets everything; deck **B** gets `500g`–`1999g`; deck **A** gets `1500g`
+  and up with no ceiling (so `1500g`–`1999g` cards sit in both A and B; cards
+  at `2000g`+ are A-only, not B — a deliberate closed range, not a floor).
+  Cards with no shop price (`N/Ag` — reward-only cards) count as `0` and land
+  in C only. Both `deck:7` call sites were changed to
+  `deck:deckForCard(id)`. Only affects newly-granted cards going forward —
+  same `hasCard()`-guarded non-destructive pattern as everything else, so a
+  card a save already has keeps whatever `deck` value it was first granted
+  with.
 - **Auto-battle**: a floating toggle button (top-right, same always-visible/
   works-anytime pattern as 2x speed below — flipping it mid-game rebuilds the
   player and carries progress forward on the latest autosave, for the same
@@ -362,16 +380,17 @@ speed) with no SWF patch involved at all.
     deck at all.
 
 **Shield Master and the original Buguese fight were confirmed with an actual
-live playthrough** — see the verification note below. **Everything in this
-round — mission-select's `grantAllCards()` addition, and all three new boss
-fights (Magma/Stag/Lumens) plus the `startBossFight()` refactor — was not.**
-Same clean-diff verification as everything else, and `startBossFight()`
-reuses the exact mechanism already proven live-working for Buguese, just
-parameterized — but repeated attempts to click through a normal
-mission-select or boss-fight launch this round stalled on Ruffle's own preloader
-animation before even reaching the login screen, with no console errors — see
-below, this looks like the pre-existing AVM1 flakiness resurfacing, not a
-regression, but it's genuinely unconfirmed by an actual playthrough this time.
+live playthrough** — see the verification note below. **Everything since —
+mission-select's `grantAllCards()` addition, all three new boss fights
+(Magma/Stag/Lumens) plus the `startBossFight()` refactor, and the deck A/B/C
+gold-tier system — was not.** Same clean-diff verification as everything
+else each time, and `startBossFight()`/`deckForCard()` both reuse mechanisms
+already proven live-working elsewhere in the same build — but repeated
+attempts to click through a normal mission-select or boss-fight launch have
+stalled on Ruffle's own preloader animation before even reaching the login
+screen every time since, with no console errors. See below — this looks like
+the pre-existing AVM1 flakiness resurfacing, not a regression, but it's
+genuinely unconfirmed by an actual playthrough.
 
 **Everything else has not been confirmed with a live playthrough.**
 Earlier attempts this session assumed the sandbox couldn't get Ruffle's AVM1
