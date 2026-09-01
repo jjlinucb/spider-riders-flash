@@ -968,6 +968,25 @@ success as proof the sandbox issue is gone.
   short, tag any new copies `deck:7`), so it applies identically
   regardless of card category despite the name. Verified via isolated
   diff: only the `wantCounts` array line changed.
+- **Stray text fragments visible near the right edge of the screen.**
+  User-reported via screenshot. Traced to a leftover developer debug
+  console, placed off-stage (x=706-1085px, well past the SWF's declared
+  640px stage width) at main-timeline tag indices 1912-1946 and never
+  removed from the display list across any of the 185 frames - meaning
+  it's present on every screen, including the Character Sheet, and
+  whatever sliver of it a given screen's clipping doesn't fully hide
+  peeks through. Decoded the actual text content (font 31's glyph
+  table): labels for `mission`/`gils`/`xp`/`event`/`state`, plus one
+  labeled `CAUTION!!!!delete All dateDO NOT USE!` wired to a button that
+  wipes save dates - a real, dangerous, never-meant-to-ship dev tool, not
+  just cosmetic clutter. Removed via `ffdec.jar -remove` (a binary
+  display-list edit, not the usual export/hand-edit-script/reimport flow
+  - the fix is deleting placements, not changing AS): deleted exactly the
+  17 `PlaceObject2Tag`s at those indices. Verified two ways: `-dumpSWF`
+  before/after, normalized and diffed - only those 17 lines removed,
+  every other tag byte-identical; and a full `-export script` diff -
+  zero AS differences, confirming no existing patch (mission-select,
+  deck tiering, boss fights, etc.) was touched.
 
 ## Other gated content found but not yet unlocked
 
