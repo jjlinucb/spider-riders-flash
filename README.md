@@ -707,6 +707,22 @@ success as proof the sandbox issue is gone.
   **the fix itself could not be re-confirmed live** — same sandbox
   rendering-stall as above, hit on every retry across fresh tabs for the
   rest of the session.
+- **Boss fights now force `deckActive = "A"`.** Requested directly: boss
+  fights should draw only from the priciest card tier. `deckActive`
+  filters `Player.CardDeck` by cost bracket at battle-init
+  (`battleSystem/scripts/DefineSprite_3152/frame_1/DoAction_6.as`, matched
+  against each card's `deckForCard()` bucket from `frame_10/DoAction.as`):
+  `"A"` only admits 1500g+ cards (bucket 5 or 7), `"B"` admits 500g+ minus
+  the top tier (6 or 7), the global default `"C"` admits everything (3, 5,
+  6, or 7 — see the near-empty-hand fix above for why that's the sane
+  global default). Checked before wiring this up: unlike a fresh mission
+  start, `startBossFight()` already calls `grantAllCards()`, which grants
+  the full ~60-card catalog including 20+ cards at 1500g+ — so restricting
+  to deck A here doesn't reintroduce the near-empty-hand bug fixed above,
+  it just narrows a large, already-owned pool down to the expensive end of
+  it. Added `root.deckActive = "A";` at the top of `startBossFight()`,
+  scoped to boss fights only — the global default and regular missions are
+  untouched. One-line isolated diff, `frame_10/DoAction.as`.
 
 ## Other gated content found but not yet unlocked
 
