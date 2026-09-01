@@ -840,6 +840,26 @@ success as proof the sandbox issue is gone.
   `startBossFight()`'s own unconditional `grantAllCards()`/
   `gearUpForMission(15)` (the boss-fight fair-fight guarantee) is
   untouched.
+- **Boss selection menu overlapped the Boss Fights button and wasted
+  space.** `openBossMenu()` (`scripts/frame_10/PlaceObject2_1865_201/
+  CLIPACTIONRECORD onClipEvent(load).as`, the real `charWindow` clip
+  actions) drew a fixed 220x150 vertical list at a hardcoded `(40,40)` -
+  which happened to sit almost exactly on top of the Boss Fights button
+  itself (still mounted and visible underneath, at a lower depth, while
+  the menu is open), matching a user screenshot showing "Buguese" and
+  "Boss Fights" text overlapping. Measured every named instance's position
+  in the charSheet frame via `-swf2xml`: the sub-tab icon row ends around
+  y=45 and the stat grid starts around y=96, a wider gap than previously
+  assumed. Redrew the menu as a single compact horizontal strip (5 items -
+  Buguese/Magma/Stag/Prince Lumens/Close - each sized to its own label,
+  22px tall instead of a 150px-tall vertical stack), anchored to
+  `bossFightBtn`'s own position instead of a hardcoded coordinate, and
+  hide the Boss Fights button (`_visible = false`) while the menu is open
+  so the two can never overlap regardless of layout math - restored on
+  Close or on `closeWindow()` (added a defensive restore there too, for
+  the case where the whole Character Sheet gets closed while the boss
+  menu happens to be open). Verified via isolated diff: only this one
+  file changed, only within `openBossMenu()`/`closeWindow()`.
 
 ## Other gated content found but not yet unlocked
 
