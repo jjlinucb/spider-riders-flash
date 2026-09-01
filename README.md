@@ -923,6 +923,13 @@ success as proof the sandbox issue is gone.
   their real cost tier. Called from `startBossFight()` right after
   `grantStrongCards()`. Verified via isolated diff: only this one file
   changed, exactly the new function plus the one call-site addition.
+  Extended right after with the rest of the dice+3-and-up Boost lineup,
+  per specific requested counts: dice+4 (Poison fang, id 507) x3, dice+8
+  (Warrior path, id 510) x1, dice+10 (Arachna power, id 511) x1. The
+  dice+3 pair (Deep Freeze id 505, Super Size id 506) was deliberately
+  left out at 0 - not every Boost tier needed guaranteeing, just these
+  five. Same isolated-diff verification: only `grantBossBoostCards()`'s
+  `wantCounts` array line changed.
 
 ## Other gated content found but not yet unlocked
 
