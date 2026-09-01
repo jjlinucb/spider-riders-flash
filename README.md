@@ -955,6 +955,19 @@ success as proof the sandbox issue is gone.
   both. Verified via isolated diff: only these two files changed, only
   the new blocks (plus the couple of one-line additions in
   `openBossMenu()`/`closeWindow()` needed to keep both buttons in sync).
+- **2x The Kleaver, 2x Elite Plate Armor for boss fights.** Requested
+  directly, after confirming these are already the two best options in
+  their categories - The Kleaver and Oracle Spear are tied for the
+  highest dice value any Weapon card reaches (+4, nothing exceeds it),
+  and Elite Plate Armor is the single highest-defense Shield card in the
+  catalog. Both already had exactly 1 guaranteed copy via
+  `grantStrongCards()` (both cost >=1500g). Extended
+  `grantBossBoostCards()`'s `wantCounts` array (`scripts/frame_10/
+  DoAction.as`) with `{id:106,want:2}` and `{id:208,want:2}` - the
+  function's top-up logic is generic (count existing copies, add more if
+  short, tag any new copies `deck:7`), so it applies identically
+  regardless of card category despite the name. Verified via isolated
+  diff: only the `wantCounts` array line changed.
 
 ## Other gated content found but not yet unlocked
 
