@@ -621,9 +621,6 @@
         const ruffle = window.RufflePlayer.newest();
         const player = ruffle.createPlayer();
         player.id = "player";
-        // Start muted - the in-game speaker icon (top right of the stage)
-        // still toggles it back on, this only changes the default.
-        player.volume = 0;
         stageWrapperEl.appendChild(player);
         currentPlayerEl = player;
 
@@ -664,7 +661,26 @@
             // they're all driven by that one clock.
             ...(speedDoubled ? { frameRate: 60 } : {}),
           })
-          .then(() => setStatus(""))
+          .then(() => {
+            // Start muted - the in-game speaker icon (top right of the
+            // stage) still toggles it back on, this only changes the
+            // default. This has to happen here, in load()'s resolution
+            // handler, rather than right after createPlayer() above (which
+            // is where an earlier version of this patch set it): Ruffle's
+            // <ruffle-player>.volume setter (ruffle-vendor/ruffle.js)
+            // delegates to `this.instance && this.instance.set_volume(e)`,
+            // and `this.instance` stays null until load() finishes building
+            // the WASM player - so setting it any earlier is silently
+            // dropped and the movie plays at Ruffle's own hardcoded default
+            // (100%, verified live: the old code's early assignment never
+            // took effect). By the time load() resolves, this.instance
+            // already exists, and the SWF itself hasn't started streaming/
+            // decoding audio yet - that begins via a fire-and-forget call
+            // made just before this promise settles - so this reliably
+            // lands before any sound could actually be heard.
+            player.volume = 0;
+            setStatus("");
+          })
           .catch((e) => {
             console.error("Ruffle player.load() rejected:", e);
             setStatus("Failed to load the game: " + e, true);

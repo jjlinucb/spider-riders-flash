@@ -860,6 +860,48 @@ success as proof the sandbox issue is gone.
   the case where the whole Character Sheet gets closed while the boss
   menu happens to be open). Verified via isolated diff: only this one
   file changed, only within `openBossMenu()`/`closeWindow()`.
+- **Boss fights granted literally every card in the game, diluting the
+  fight with weak ones.** `startBossFight()` called `grantAllCards()`
+  (all 61 cards) before forcing `deckActive = "A"` - but only 21 of those
+  61 cards actually cost >=1500g, the tier Deck A's filter
+  (`deckNbrArr = [1,4,5,7]`, which only ever matches `deckForCard()`'s
+  reachable outputs 5 and 7) actually draws from. The other 40 land in
+  `deckForCard()` buckets 3 or 6, neither of which Deck A's filter
+  includes - so they never even show up in the boss-fight deck, they just
+  bloat `playerStats.card` for no benefit while still being real weight
+  in a game that reports 61 as "the full catalog." Added a new
+  `grantStrongCards()` (`scripts/frame_10/DoAction.as`, right after
+  `grantAllCards()`) that loops the same 61-id list but only pushes a
+  card if `deckForCard()` returns 5 or 7, and swapped `startBossFight()`
+  to call it instead. Boss fights still guarantee a full, non-empty Deck
+  A (all 21 qualifying cards, same as before `grantAllCards()` would have
+  produced once filtered) without the other 40 cards ever touching
+  `playerStats.card` in the first place. `gearUpForMission(15)` (mission-
+  tier victory points/rank/spider access, plus a small curated gear list)
+  is untouched - only the full-catalog grant was replaced. Verified via
+  isolated diff: only this one file changed, exactly the new function
+  plus the one call-site swap.
+- **Sound wasn't actually muted by default, despite existing code that
+  looked like it should.** `index.html` already had `player.volume = 0;`
+  right after `ruffle.createPlayer()` - but it was a silent no-op.
+  Traced why in `ruffle-vendor/ruffle.js`: `<ruffle-player>`'s `volume`
+  setter is `this.instance && this.instance.set_volume(e)`, and
+  `this.instance` stays `null` until `player.load(...)` finishes building
+  the WASM core - so setting it any earlier gets silently dropped and the
+  movie plays at Ruffle's own hardcoded default (100%). Confirmed live:
+  polling `player.volume` against the unmodified file stayed `1` for 10+
+  seconds past full load, never `0`. Fixed by moving the assignment into
+  `.load(...).then(...)`, after `this.instance` is guaranteed to exist -
+  reverified live, volume now reads `1` for ~270ms then drops to `0` and
+  stays there, including across the 2x-speed toggle's player-rebuild path
+  (there's only one `createPlayer()` call site, shared by every load
+  path). Caveat: the SWF has its own independent AS2 audio mixer with its
+  own speaker-icon toggle on the Character Sheet
+  (`root.setNewVolume()`/`sVol`, `scripts/frame_1/DoAction.as`) that has
+  no connection to Ruffle's player-level volume - the icon still shows
+  and toggles normally, but since the new fix mutes downstream of the
+  SWF's own mixer, clicking "unmute" in-game no longer actually produces
+  sound. The icon is now decorative with respect to audible output.
 
 ## Other gated content found but not yet unlocked
 
