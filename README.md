@@ -930,6 +930,31 @@ success as proof the sandbox issue is gone.
   left out at 0 - not every Boost tier needed guaranteeing, just these
   five. Same isolated-diff verification: only `grantBossBoostCards()`'s
   `wantCounts` array line changed.
+- **In-game Mission Select menu.** Requested directly: a way to replay
+  any of the 15 missions from the Character Sheet, mirroring the Boss
+  Fights button/menu pattern rather than requiring a full page reload
+  through the pre-game dropdown. Added a second small button,
+  "Missions" (`scripts/DefineSprite_1865/frame_8/DoAction.as`, right
+  after the `bossFightBtn` block, positioned immediately to its right -
+  same gradient-banner chrome, same row), and a matching `drawWindow4()`/
+  `openMissionMenu()` pair (`scripts/frame_10/PlaceObject2_1865_201/
+  CLIPACTIONRECORD onClipEvent(load).as`, same file `openBossMenu()`
+  lives in) that draws a compact horizontal strip of all 15 mission
+  numbers plus Close - anchored at a fixed `x=10` rather than either
+  trigger button's own position, since 15 items (~514px total) wouldn't
+  fit if anchored further right without running off the 640px stage.
+  Picking a mission sets `playerStats.mission` and does
+  `gotoAndStop("level"+N)` directly - no `grantAllCards()`/
+  `gearUpForMission()` involved, so it doesn't reintroduce the "always
+  cheats" behavior the Cheats toggle exists to prevent; you keep
+  whatever you've actually earned and just jump to that mission's map.
+  Both trigger buttons now hide/restore together whenever either menu
+  (boss or mission) is open, and `closeWindow()` cleans up either menu
+  if the whole Character Sheet gets closed while one is open - the same
+  defensive pattern the Boss Fights button already used, now shared by
+  both. Verified via isolated diff: only these two files changed, only
+  the new blocks (plus the couple of one-line additions in
+  `openBossMenu()`/`closeWindow()` needed to keep both buttons in sync).
 
 ## Other gated content found but not yet unlocked
 
