@@ -723,6 +723,71 @@ success as proof the sandbox issue is gone.
   it. Added `root.deckActive = "A";` at the top of `startBossFight()`,
   scoped to boss fights only — the global default and regular missions are
   untouched. One-line isolated diff, `frame_10/DoAction.as`.
+- **Mission-select dropdown trimmed back to Mission 1-15.** The pre-boot
+  HTML dropdown (`index.html`) had grown to also list "Bonus Mission 1/2/3"
+  and the 4 "*Name* (Boss Fight)" entries added in earlier sessions -
+  removed those two `<option>`-generating loops so the dropdown is just
+  Mission 1-15 again. Both are meant to be reached in-game instead: bonus
+  missions via the Character Sheet's real "BONUS LEVELS" button plus a
+  webcode, boss fights via the Character Sheet's new "Boss Fights" button
+  (below). The now-dead `BOSS_FIGHTS`/`chosenCamp` JS in `launchPlayer` was
+  left in place rather than ripped out - `selectedValue` can only ever be
+  `"1".."15"` now, so those branches never fire, but it's harmless and the
+  trim didn't need the extra risk of touching more than the two loops.
+
+  Added a small note under the dropdown surfacing the 3 real bonus-mission
+  webcodes, recovered directly from `sprSettings01_EN.xml`'s
+  `<webcodes>shadow,Lumens,Grasshop</webcodes>` (confirmed against
+  `DefineSprite_1161/frame_1/PlaceObject2_147_10`'s `onClipEvent(load)`:
+  `webcode = root.webcodeArray[0/1/2]` for camp 1/2/3 respectively, checked
+  via a plain client-side string compare against `webcodeTxt.text` - no
+  server call, so this already works fully offline, nothing to fix): Bonus
+  1 = `shadow`, Bonus 2 = `Lumens`, Bonus 3 = `Grasshop` (exact case). Pure
+  `index.html` change, no SWF patch - styled to match the existing dark
+  mission-select screen.
+- **Character Sheet boss-fight button.** Removing the boss-fight dropdown
+  shortcuts above raised a real question: are the 4 boss fights still
+  reachable at all without them? Traced the shell SWF's full display list
+  (`ffdec -dumpSWF`, not `-export script` alone - script export only
+  surfaces clips that *have* a clip action, and the placement in question
+  turned out to have none) for every `PlaceObject2` referencing `optionBar`
+  (`DefineSprite_1960`, whose nested `PlaceObject2_1958_68` button calls
+  `root.charWindow.drawWindow3()` on press - the same function the
+  existing in-game boss menu, see "In-game boss/bonus-mission menu" above,
+  hangs off). There is exactly one such placement in the whole SWF:
+  main-timeline frame 46, depth 7 - inside the "world" label's frame range
+  (45-50, right before "level1" at 51), the background guild/chat/
+  multiplayer-hub preload chain this single-player rebuild walks through
+  but never actually renders (see "Other gated content" below). Its
+  `onPress` handler also closes `root.upPanel`/`root.downPanel` - world-hub
+  HUD panels, confirming it's world-hub-only, not Character Sheet content.
+  Cross-checked by grepping every `.drawWindow3()` call across a fresh
+  808-file script export: `optionBar` is the *only* caller anywhere in the
+  SWF. By contrast, the real Character Sheet (`charWindow.drawWindow()`,
+  the "charSheet" tab) has a genuine per-mission trigger - every
+  `scr1_2.swf` through `scr15_2.swf` places a HUD button (e.g. `scr1_2.swf`'s
+  `frame_2/PlaceObject2_154_231`) whose press sets
+  `root.upPanel.endFct = root.charWindow.drawWindow` before closing the
+  panels, so the Character Sheet itself is genuinely reachable mid-mission
+  - the boss-fight/"options" tab never was.
+
+  Fixed by adding a small always-visible "Boss Fights" button directly to
+  the Character Sheet's own tab (`scripts/DefineSprite_1865/frame_8/
+  DoAction.as`, the "charSheet" frame body - `DefineSprite_1865` is
+  `charWindow`'s own character id) - same `createEmptyMovieClip`+
+  drawing-API pattern the existing boss-menu overlay itself already uses
+  (no new `DefineButton2`/`PlaceObject2` tags), calling the exact same
+  `drawWindow3()` `optionBar` already used. Verified via isolated diff
+  (fresh `-export script` before/after the reimport, full 808-file tree):
+  only this one file changed, exactly the added block. **Confirmed with an
+  actual live playthrough** - Ruffle rendered normally this session
+  (unlike most of this file's other "could not confirm live" notes):
+  logged in, landed on the auto-opened Character Sheet, the new "Boss
+  Fights" button appeared bottom-left exactly as placed, clicking it
+  opened the "OPTIONS" tab with the same Buguese/Magma/Stag/Prince Lumens
+  overlay the in-world menu draws, and clicking Buguese launched the real
+  battle (Dice 18/Defence 20/Life 45 opponent, matching the documented
+  stats above, a geared player, a populated hand, zero console errors).
 
 ## Other gated content found but not yet unlocked
 

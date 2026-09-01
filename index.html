@@ -21,28 +21,36 @@
     original 2007 swfobject-based embed, kept untouched for reference).
 
   - Mission select: before Ruffle boots, visitors see a small "choose a
-    mission" screen (dropdown 1-15 plus 3 bonus missions, default Mission 1,
-    Start Game button) instead of the player loading immediately. A regular
-    mission choice is passed to Ruffle as a `startMission` FlashVar/parameter.
+    mission" screen (dropdown Mission 1-15, default Mission 1, Start Game
+    button) instead of the player loading immediately. A mission choice is
+    passed to Ruffle as a `startMission` FlashVar/parameter.
     SpiderRider_2_edited.swf has a small patch in scripts/frame_10/DoAction.as,
     right after the shell's hardcoded `playerStats.mission = 1;`:
         if (startMission != undefined) { playerStats.mission = startMission; }
     The shell's existing frame_54 dispatcher already does
     `gotoAndStop("level" + root.playerStats.mission)`, so setting this one
     variable before boot is all that's needed to land directly on any
-    mission. A bonus-mission choice ("Bonus Mission 1/2/3" in the dropdown,
-    internally "camp1"/"camp2"/"camp3") instead rides in as a `startCamp`
-    FlashVar; frame_10 stashes it on `root.startCamp` and grants the player
-    every card in the game (`grantAllCards()`), and frame_54 got a new
-    branch, checked before the regular mission dispatch:
-        if (root.startCamp != undefined) {
-          root.so.data["camp" + root.startCamp] = true;  // bypasses the
-          root.so.flush();                                // original promo-
-          root.gotoAndPlay("camp" + root.startCamp);       // code gate
-        }
-    (The date-based lock on these three is already moot regardless — it only
-    fires if the real clock is still inside the original 2007-2009 promo
-    window, see README.) SpiderRider_2_edited.orig.swf alongside this file is
+    mission.
+
+    Bonus missions and the 4 boss fights used to have their own entries in
+    this dropdown too (`startCamp`/`startBuguese`/`startMagma`/`startStag`/
+    `startLumens` FlashVars, same frame_10/frame_54 plumbing described in
+    README.md). As of the 2026-08-31 trim they were removed from here since
+    they're meant to be reached in-game instead: bonus missions via the
+    Character Sheet's "BONUS LEVELS" button plus the real webcode for each
+    (see the note under the mission dropdown below), and the 4 boss fights
+    via a small "Boss Fights" button added directly to the Character Sheet
+    (root.charWindow's "charSheet" tab, scripts/DefineSprite_1865/frame_8/
+    DoAction.as) - the game's own in-world trigger for that same menu
+    (`optionBar`, a button on the main timeline's frame 46) turned out to
+    live only on the background world-hub screen this single-player rebuild
+    never actually renders, so it was never reachable from the Character
+    Sheet on its own. See README.md's "In-game boss/bonus-mission menu" and
+    "Character Sheet boss-fight button" entries for the full trace. The
+    `BOSS_FIGHTS`/`chosenCamp` JS below is left in place as harmless dead
+    code - `selectedValue` can now only ever be "1".."15", so those
+    branches never fire, but ripping them out wasn't worth the risk for a
+    trim this small. SpiderRider_2_edited.orig.swf alongside this file is
     the pre-patch backup from before ANY patch in this file, kept in case
     this ever needs reverting.
 
@@ -342,6 +350,24 @@
     max-width: 200px;
     text-align: right;
   }
+
+  #bonus-note {
+    margin: 0;
+    font-size: 11px;
+    line-height: 1.5;
+    color: #7a7d82;
+    text-align: center;
+  }
+
+  #bonus-note code {
+    background: #0a0a0c;
+    border: 1px solid #26262a;
+    border-radius: 2px;
+    padding: 1px 5px;
+    color: #cfd2d6;
+    font-family: inherit;
+    font-size: 11px;
+  }
 </style>
 </head>
 <body>
@@ -371,6 +397,13 @@
     <select id="mission-select"></select>
   </div>
   <button id="start-button" type="button">Start Game</button>
+  <p id="bonus-note">
+    Bonus Levels are unlocked in-game (Character Sheet &rarr; Bonus Levels)
+    using these webcodes: Bonus 1 = <code>shadow</code>, Bonus 2 =
+    <code>Lumens</code>, Bonus 3 = <code>Grasshop</code>. Boss fights
+    (Buguese/Magma/Stag/Prince Lumens) are reached from the Character
+    Sheet&rsquo;s "Boss Fights" button.
+  </p>
 </div>
 
 <div id="stage-wrapper" class="hidden"></div>
@@ -497,12 +530,15 @@
       lumens: { label: "Prince Lumens", flashVar: "startLumens" },
     };
 
-    // Populate the mission dropdown: Mission 1 .. Mission 15, default = 1,
-    // plus the 3 bonus "camp" missions. Camp values are prefixed "camp" so
-    // launchPlayer can tell them apart from a plain mission number - they
-    // launch via a different FlashVar (startCamp, not startMission) since
-    // they're a separate part of the shell (frame_54's dispatcher), not one
-    // of the scrN_2.swf mission modules.
+    // Populate the mission dropdown: Mission 1 .. Mission 15, default = 1.
+    // Bonus missions and boss fights used to have entries here too (see the
+    // comment block at the top of this file for why they were removed
+    // 2026-08-31) - they're reached in-game now instead, via the Character
+    // Sheet's "BONUS LEVELS" button (webcodes noted below) and its new
+    // "Boss Fights" button respectively. BOSS_FIGHTS/chosenCamp below are
+    // kept only because launchPlayer still harmlessly checks for them -
+    // selectedValue can no longer ever match, so those branches are dead
+    // code now.
     for (let i = 1; i <= 15; i++) {
       const opt = document.createElement("option");
       opt.value = String(i);
@@ -510,22 +546,6 @@
       if (i === 1) {
         opt.selected = true;
       }
-      missionSelectEl.appendChild(opt);
-    }
-    for (let i = 1; i <= 3; i++) {
-      const opt = document.createElement("option");
-      opt.value = "camp" + i;
-      opt.textContent = "Bonus Mission " + i;
-      missionSelectEl.appendChild(opt);
-    }
-    // Standalone boss fights, previously only reachable through the dead
-    // multiplayer world hub - each rides its own startX FlashVar into a
-    // frame_54 branch that calls startBossFight() directly (see frame_10/
-    // DoAction.as). BOSS_FIGHTS maps dropdown value -> {label, flashVar}.
-    for (const [value, { label }] of Object.entries(BOSS_FIGHTS)) {
-      const opt = document.createElement("option");
-      opt.value = value;
-      opt.textContent = label + " (Boss Fight)";
       missionSelectEl.appendChild(opt);
     }
 
