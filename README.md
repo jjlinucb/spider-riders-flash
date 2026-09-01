@@ -987,6 +987,33 @@ success as proof the sandbox issue is gone.
   every other tag byte-identical; and a full `-export script` diff -
   zero AS differences, confirming no existing patch (mission-select,
   deck tiering, boss fights, etc.) was touched.
+- **Removed the save/load system entirely** (supersedes the "Save/load"
+  entry earlier in this file, kept there as a historical record of how
+  it originally worked). Requested directly: with the mission-select
+  dropdown and the in-game Character Sheet "Missions" menu both able to
+  jump straight to any mission on demand, resuming roughly where you
+  left off across a page reload stopped being worth the complexity it
+  added. Removed from `SpiderRider_2_edited.swf` (`scripts/frame_10/
+  DoAction.as`): `buildSaveString()`, `applySaveString()`,
+  `autoSaveTick()`, and the `saveInterval = setInterval(autoSaveTick,
+  5000)` registration; simplified the boot-time branch that checked an
+  `importedSave` FlashVar then `so.data.saveGame` to always initialize
+  blank default stats instead (`so` itself is untouched - the camp1/2/3
+  bonus-mission webcode unlocks still use it for their own, unrelated
+  storage). Removed from `index.html`: the whole "Load a save file" /
+  "Download current save" / "Clear autosave & start fresh" bar (HTML,
+  CSS, and JS - `onSpiderSave`, `latestSave`, `importedSaveText`, and
+  their three event listeners), and simplified `launchPlayer()` to take
+  no save argument at all. One real behavior change worth flagging: the
+  2x Speed and Auto-battle toggles used to carry an in-progress autosave
+  across the player rebuild they require - since there's no save state
+  left to carry, toggling either one mid-game now just restarts the
+  current mission from scratch (the toggle handlers and their status
+  text were updated to say so plainly rather than silently changing
+  behavior). Verified via isolated diff on the SWF side (only
+  `frame_10/DoAction.as` changed, exactly the three functions plus the
+  boot-branch simplification) and a syntax check on the extracted inline
+  `<script>` for the `index.html` side.
 
 ## Other gated content found but not yet unlocked
 

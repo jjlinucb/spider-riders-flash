@@ -76,31 +76,20 @@
     are untouched. All gated on `CurrentPlayer == TURN_PLAYER`, so the
     existing opponent AI is untouched.
 
-  - Save/load: this SWF version has no FileReference class and no
-    ExternalInterface (nothing calls addCallback), so there's no JS<->SWF
-    channel except the one-way getURL("javascript:...") bridge already used
-    by googleAnalytic(). Given that, saving works like this:
-      1. Autosave: frame_10/DoAction.as's autoSaveTick(), on a 5s
-         setInterval, snapshots the fields worth keeping (victory points,
-         mission, gils, name, card inventory - not avatar/spider
-         customization, which was cut from scope to avoid restoring
-         `undefined` customization fields as 0 into rendering code this
-         patch never traced) into a compact `|`-delimited string (see
-         buildSaveString()/applySaveString() in that file), writes it to the
-         existing `so` SharedObject (so.data.saveGame - the same local save
-         object camp1/2/3 webcodes already use) so it survives a refresh in
-         this browser, AND reports it to the page via
-         getURL("javascript:onSpiderSave('...')") so "Download current
-         save" above has something to offer as a file.
-      2. On boot, frame_10 checks for an `importedSave` FlashVar first, then
-         so.data.saveGame, and only falls back to the original hardcoded
-         blank stats if neither exists - existing saves and brand-new
-         players both see unchanged behavior.
-      3. Loading a file back in: since there's no JS->SWF channel, picking a
-         file in "Load a save file" doesn't reach into a running game - it's
-         read client-side and held until Start Game is clicked, at which
-         point its contents ride in as the `importedSave` FlashVar above.
-    Not yet confirmed with a live playthrough - see README.
+  - Save/load: removed 2026-09-01. This SWF version has no FileReference
+    class and no ExternalInterface, so there was never a real JS<->SWF
+    save channel to begin with - the whole system (autosave every 5s to
+    a SharedObject, "Download current save", "Load a save file", "Clear
+    autosave & start fresh") existed only to let players resume roughly
+    where they left off across a page reload. With the mission-select
+    dropdown and the in-game Character Sheet "Missions" button both able
+    to jump straight to any of the 15 missions on demand, that whole
+    resume-across-reloads problem stopped being one worth solving - every
+    launch just starts from the same blank-stats baseline now (frame_10's
+    boot logic no longer branches on an `importedSave` FlashVar or
+    `so.data.saveGame` at all), and the toggles below that used to carry
+    an in-progress autosave across a mid-game player rebuild now just
+    restart the current mission from scratch instead.
 
   - 2x Speed: a floating toggle button (top-right, works on every screen -
     mission-select or mid-game) passes `frameRate: 60` in Ruffle's load()
@@ -110,11 +99,10 @@
     execute under the same player instance), so overriding the rate at load
     time doubles all of them at once. Ruffle only lets you pick a frame rate
     when *building* a player instance, not on one already running, so
-    toggling mid-game tears the player down and rebuilds it, carrying
-    progress forward on the latest autosave (up to ~5s may rewind, and it
-    can't preserve an in-progress battle or exact map position - see the
-    save/load entry above for exactly what the autosave does and doesn't
-    capture). Off = untouched default (native 30fps).
+    toggling mid-game tears the player down and rebuilds it - since save/
+    load was removed (see above), this now just restarts the current
+    mission from scratch rather than carrying progress forward. Off =
+    untouched default (native 30fps).
 
   - Cheats toggle: a checkbox on the mission-select screen (default OFF),
     sent as a `cheatsEnabled` FlashVar alongside `startMission`. Before this
@@ -285,50 +273,6 @@
     background: #0a0a0c;
   }
 
-  /* --- Save bar: always visible, above the mission screen / stage --- */
-  #save-bar {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    flex-wrap: wrap;
-    justify-content: center;
-    font-size: 12px;
-  }
-
-  #save-file-input {
-    color: #cfd2d6;
-    font-size: 12px;
-    max-width: 220px;
-  }
-
-  #download-save-button {
-    background: #1c1c20;
-    color: #e8e6df;
-    border: 1px solid #3a3a40;
-    padding: 6px 14px;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    font-family: inherit;
-    border-radius: 2px;
-    cursor: pointer;
-  }
-
-  #download-save-button:hover:not(:disabled) {
-    background: #26262c;
-    border-color: #565b63;
-  }
-
-  #download-save-button:disabled {
-    color: #55585c;
-    cursor: default;
-  }
-
-  #save-status {
-    color: #7a7d82;
-    font-size: 12px;
-  }
-
   .hidden {
     display: none !important;
   }
@@ -403,16 +347,6 @@
   <span id="speed-toggle-note"></span>
 </div>
 
-<div id="save-bar">
-  <div class="field-row">
-    <label for="save-file-input">Load a save file</label>
-    <input id="save-file-input" type="file" accept=".txt,.sav,text/plain" />
-  </div>
-  <button id="download-save-button" type="button" disabled>Download current save</button>
-  <button id="clear-autosave-button" type="button">Clear autosave &amp; start fresh</button>
-  <span id="save-status"></span>
-</div>
-
 <div id="mission-screen">
   <p>Choose a mission to start from.</p>
   <div class="field-row">
@@ -455,10 +389,6 @@
     const missionSelectEl = document.getElementById("mission-select");
     const cheatsCheckboxEl = document.getElementById("cheats-checkbox");
     const startButtonEl = document.getElementById("start-button");
-    const saveFileInputEl = document.getElementById("save-file-input");
-    const downloadSaveButtonEl = document.getElementById("download-save-button");
-    const clearAutosaveButtonEl = document.getElementById("clear-autosave-button");
-    const saveStatusEl = document.getElementById("save-status");
     const speedToggleButtonEl = document.getElementById("speed-toggle-button");
     const speedToggleNoteEl = document.getElementById("speed-toggle-note");
     const autoBattleToggleButtonEl = document.getElementById("autobattle-toggle-button");
@@ -481,75 +411,6 @@
     // the next Start Game) or mid-playthrough (rebuilds immediately).
     let speedDoubled = false;
     let currentPlayerEl = null;
-
-    // Latest save string reported by the running SWF (frame_10/DoAction.as
-    // calls `getURL("javascript:onSpiderSave('...')")` every autosave tick,
-    // ~5s, since there's no ExternalInterface in this old SWF version to pull
-    // data out any other way). Whatever the SWF last reported is what
-    // "Download current save" writes to a file.
-    let latestSave = null;
-    // Contents of a save file the visitor picked before clicking Start Game.
-    // There's no JS -> SWF channel either, so this rides in as a FlashVar
-    // (`importedSave`, read by the same frame_10 patch) rather than being
-    // injected into a running game.
-    let importedSaveText = null;
-
-    window.onSpiderSave = (escapedSaveStr) => {
-      // AS2 only has escape()/unescape() (predates encodeURIComponent), and
-      // escape() emits %uXXXX for non-ASCII, which decodeURIComponent can't
-      // parse - unescape() is deprecated but is the actual matching decoder.
-      latestSave = unescape(escapedSaveStr);
-      downloadSaveButtonEl.disabled = false;
-    };
-
-    downloadSaveButtonEl.addEventListener("click", () => {
-      if (!latestSave) return;
-      const blob = new Blob([latestSave], { type: "text/plain" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "spider-riders-save.txt";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    });
-
-    clearAutosaveButtonEl.addEventListener("click", () => {
-      // Ruffle emulates Flash's SharedObject.getLocal("spiderSo")
-      // (frame_1/DoAction.as:14) via the browser's localStorage. There's no
-      // documented fixed key format for Ruffle's web backend, so match any
-      // key containing the shared-object name literally rather than
-      // guessing its exact prefix/path scheme.
-      const matches = [];
-      for (let i = localStorage.length - 1; i >= 0; i--) {
-        const key = localStorage.key(i);
-        if (key && key.includes("spiderSo")) {
-          matches.push(key);
-        }
-      }
-      matches.forEach((key) => localStorage.removeItem(key));
-
-      saveStatusEl.textContent =
-        matches.length > 0
-          ? `Cleared ${matches.length} autosave key(s) - next launch starts fresh.`
-          : "No autosave found in this browser (nothing to clear).";
-    });
-
-    saveFileInputEl.addEventListener("change", () => {
-      const file = saveFileInputEl.files[0];
-      if (!file) return;
-      file.text().then((text) => {
-        const trimmed = text.trim();
-        if (trimmed.split("|").length < 5) {
-          saveStatusEl.textContent = "That doesn't look like a Spider Riders save file.";
-          saveFileInputEl.value = "";
-          return;
-        }
-        importedSaveText = trimmed;
-        saveStatusEl.textContent = "Save loaded - it'll be used when you click Start Game.";
-      });
-    });
 
     const BOSS_FIGHTS = {
       buguese: { label: "Buguese", flashVar: "startBuguese" },
@@ -595,11 +456,8 @@
       statusEl.classList.toggle("error", !!isError);
     };
 
-    // (re)builds the Ruffle player. `saveToUse` is passed explicitly by every
-    // caller (rather than defaulting to `importedSaveText` in here) so the
-    // speed toggle's "no autosave yet" case can unambiguously mean "launch
-    // with no save" instead of silently falling back to a stale file pick.
-    const launchPlayer = (saveToUse) => {
+    // (re)builds the Ruffle player.
+    const launchPlayer = () => {
       const selectedValue = missionSelectEl.value;
       const chosenCamp = selectedValue.indexOf("camp") === 0 ? selectedValue.slice(4) : null;
       const chosenBossFlashVar = BOSS_FIGHTS[selectedValue] ? BOSS_FIGHTS[selectedValue].flashVar : null;
@@ -645,7 +503,6 @@
               cheatsEnabled: chosenCheats,
               ...(chosenCamp ? { startCamp: chosenCamp } : {}),
               ...(chosenBossFlashVar ? { [chosenBossFlashVar]: "1" } : {}),
-              ...(saveToUse ? { importedSave: saveToUse } : {}),
             },
             allowScriptAccess: true,
             backgroundColor: "#000000",
@@ -691,7 +548,7 @@
       }
     };
 
-    startButtonEl.addEventListener("click", () => launchPlayer(importedSaveText));
+    startButtonEl.addEventListener("click", () => launchPlayer());
 
     const updateSpeedToggleUi = () => {
       speedToggleButtonEl.textContent = "2x Speed: " + (speedDoubled ? "On" : "Off");
@@ -711,17 +568,10 @@
 
       // A player is already running: the only way to change its frame rate
       // is to rebuild it from scratch (see the note by `speedDoubled`
-      // above), so carry the game forward on the latest autosave rather than
-      // dropping the player back to blank stats. `latestSave` only updates
-      // every ~5s (frame_10/DoAction.as's autoSaveTick interval - see
-      // README), so this can rewind up to that much unsaved progress, and it
-      // can't restore an in-progress battle or exact map position (the
-      // autosave only tracks victory points/mission/gils/name/cards, not
-      // battle state) - the mission itself restarts at its entry point.
-      speedToggleNoteEl.textContent = latestSave
-        ? "Reloading from last autosave (up to ~5s of progress may rewind)…"
-        : "Reloading - no autosave yet, so this restarts the current mission from scratch…";
-      launchPlayer(latestSave || null);
+      // above) - there's no save state to carry forward anymore, so this
+      // just restarts the current mission from its entry point.
+      speedToggleNoteEl.textContent = "Reloading - this restarts the current mission from scratch…";
+      launchPlayer();
       setTimeout(() => { speedToggleNoteEl.textContent = ""; }, 4000);
     });
 
@@ -739,12 +589,9 @@
         return;
       }
 
-      // Same rebuild-and-carry-forward-on-autosave story as the speed
-      // toggle above - see its comment for the exact tradeoffs.
-      speedToggleNoteEl.textContent = latestSave
-        ? "Reloading from last autosave (up to ~5s of progress may rewind)…"
-        : "Reloading - no autosave yet, so this restarts the current mission from scratch…";
-      launchPlayer(latestSave || null);
+      // Same rebuild story as the speed toggle above - see its comment.
+      speedToggleNoteEl.textContent = "Reloading - this restarts the current mission from scratch…";
+      launchPlayer();
       setTimeout(() => { speedToggleNoteEl.textContent = ""; }, 4000);
     });
   });
