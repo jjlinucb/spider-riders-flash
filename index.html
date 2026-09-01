@@ -116,6 +116,22 @@
     save/load entry above for exactly what the autosave does and doesn't
     capture). Off = untouched default (native 30fps).
 
+  - Cheats toggle: a checkbox on the mission-select screen (default OFF),
+    sent as a `cheatsEnabled` FlashVar alongside `startMission`. Before this
+    toggle existed, picking any mission via this dropdown ALWAYS granted
+    every card in the game (`grantAllCards()`) and, for missions after 1,
+    auto-set victory points/spider-mount/gear to a mission-appropriate tier
+    (`gearUpForMission()`) - there was no way to play a normal, earn-your-
+    way-up game from this launcher. SpiderRider_2_edited.swf
+    (scripts/frame_10/DoAction.as) now only calls those two functions from
+    the startMission handler when `cheatsEnabled` is true; picking a mission
+    with cheats off just sets `playerStats.mission` and lets the player earn
+    cards/gear/victory points normally from there. The cosmetic armor/
+    manacle tier (`typeArmor`/`typeManacle` - which outfit renders, not a
+    stat) still auto-adjusts to the chosen mission either way, and
+    startBossFight()'s unconditional grantAllCards()/gearUpForMission(15)
+    (the boss-fight "fair fight" guarantee) is untouched by this toggle.
+
   HOW TO RUN: modern browsers block WebAssembly/fetch from file:// origins, so
   double-clicking this file will NOT work reliably. Serve the folder over HTTP
   instead, e.g. from a terminal in this directory:
@@ -220,6 +236,13 @@
     font-size: 13px;
     color: #cfd2d6;
     letter-spacing: 0.02em;
+  }
+
+  #cheats-checkbox {
+    accent-color: #4c9a5e;
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
   }
 
   #mission-select {
@@ -396,6 +419,10 @@
     <label for="mission-select">Mission</label>
     <select id="mission-select"></select>
   </div>
+  <div class="field-row">
+    <label for="cheats-checkbox">Cheats: instant max gear when skipping ahead to a later mission</label>
+    <input id="cheats-checkbox" type="checkbox" />
+  </div>
   <button id="start-button" type="button">Start Game</button>
   <p id="bonus-note">
     Bonus Levels are unlocked in-game (Character Sheet &rarr; Bonus Levels)
@@ -426,6 +453,7 @@
     const stageWrapperEl = document.getElementById("stage-wrapper");
     const statusEl = document.getElementById("status");
     const missionSelectEl = document.getElementById("mission-select");
+    const cheatsCheckboxEl = document.getElementById("cheats-checkbox");
     const startButtonEl = document.getElementById("start-button");
     const saveFileInputEl = document.getElementById("save-file-input");
     const downloadSaveButtonEl = document.getElementById("download-save-button");
@@ -549,6 +577,19 @@
       missionSelectEl.appendChild(opt);
     }
 
+    // Mission 16 isn't a real playable mission - it's the shell's own
+    // "campaign complete" state (see frame_158's onClipEvent(load) in
+    // SpiderRider_2_edited.swf, which sets playerStats.mission = 16 when
+    // Mission 15 is finished normally). Offering it here as its own option
+    // reuses that exact same startMission plumbing (no SWF-side branching
+    // needed) and lands the player straight past the 15 story missions,
+    // with only boss fights and bonus levels left to do via the Character
+    // Sheet buttons described below.
+    const missionsCompleteOpt = document.createElement("option");
+    missionsCompleteOpt.value = "16";
+    missionsCompleteOpt.textContent = "Missions Complete (Boss Fights + Bonus only)";
+    missionSelectEl.appendChild(missionsCompleteOpt);
+
     const setStatus = (msg, isError) => {
       statusEl.textContent = msg;
       statusEl.classList.toggle("error", !!isError);
@@ -564,6 +605,7 @@
       const chosenBossFlashVar = BOSS_FIGHTS[selectedValue] ? BOSS_FIGHTS[selectedValue].flashVar : null;
       const chosenMission = String(parseInt(selectedValue, 10) || 1);
       const chosenAutoBattle = String(autoBattleOn);
+      const chosenCheats = String(cheatsCheckboxEl.checked);
 
       missionScreenEl.classList.add("hidden");
       stageWrapperEl.classList.remove("hidden");
@@ -603,6 +645,7 @@
               xmlNbr: "01",
               startMission: chosenMission,
               autoBattle: chosenAutoBattle,
+              cheatsEnabled: chosenCheats,
               ...(chosenCamp ? { startCamp: chosenCamp } : {}),
               ...(chosenBossFlashVar ? { [chosenBossFlashVar]: "1" } : {}),
               ...(saveToUse ? { importedSave: saveToUse } : {}),

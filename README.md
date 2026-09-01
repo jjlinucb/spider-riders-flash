@@ -789,6 +789,58 @@ success as proof the sandbox issue is gone.
   battle (Dice 18/Defence 20/Life 45 opponent, matching the documented
   stats above, a geared player, a populated hand, zero console errors).
 
+- **Boss Fights button didn't match the game's own button chrome, and
+  overlapped the character sheet's own tab row.** The button added above
+  was a flat, hand-drawn rectangle at a hardcoded `(_x=10, _y=450)` -
+  measuring every `PlaceObject2` matrix in `DefineSprite_1865/frame_8` via
+  `-swf2xml` showed that position landing almost exactly on `btn_saveAva`
+  (y=453.8), i.e. on top of the persistent LOGOUT/SAVE AVATAR/MISSION/
+  ARACHNA ONLINE/BONUS LEVELS bar, matching a user screenshot report
+  exactly. Moved it to an empirically-empty band (y≈36-84px, below the
+  character sheet's own sub-tabs, above the stat grid) checked against
+  every named button and text field's actual measured position in that
+  frame - no linkage/export name exists for the game's real button symbol
+  (character 624), so it's redrawn by hand via `beginGradientFill`/
+  `lineStyle` using the exact gradient/border RGBA stops and near-white
+  label color (`0xECFFFF`) confirmed from the real MISSION/Solo buttons'
+  own shape and text data, as a slanted banner instead of a flat box. Font
+  is an approximation (`_sans` device font, no embedded-font linkage
+  found) - everything else is a measured match, not a guess.
+- **Boss fights permanently set `playerStats.mission = 15`, sending any
+  fallback redirect (e.g. after the battle ends) to the *start* of Mission
+  15 instead of treating the campaign as finished.** The game already has
+  a canonical "campaign complete" value for this: frame 158 (the real
+  "level16" frame, reached when Mission 15 is finished normally) sets
+  `playerStats.mission = 16` and shows `nameMisEnd` -
+  `"CONGRATULATIONS ON COMPLETING THE MISSIONS!"` - confirmed via
+  `-swf2xml`, verified no code anywhere indexes `playerStats.mission` as
+  an array (only clamped math and the `"level"+mission` string). Changed
+  `startBossFight()` to set `16` instead of `15`, reusing the game's own
+  existing "only boss fights and bonus levels left" state rather than
+  inventing a new one. Also added a "Missions Complete (Boss Fights +
+  Bonus only)" option to the `index.html` mission dropdown, wired through
+  the same `startMission` FlashVar, so players can jump straight to that
+  state without going through a boss fight first.
+- **Cheats toggle.** Before this, picking *any* mission from the
+  `index.html` dropdown - even Mission 1 - unconditionally called
+  `grantAllCards()` (all 61 cards) and, for missions after 1,
+  `gearUpForMission()` (mission-tier victory points, early spider-mount
+  access, mission-appropriate gear cards): there was no way to actually
+  play the game normally from this launcher. Added a "Cheats" checkbox to
+  the mission-select screen, default **off**, sent as a new
+  `cheatsEnabled` FlashVar. `scripts/frame_10/DoAction.as` now only calls
+  those two functions from the `startMission` handler when
+  `cheatsEnabled` is true (normalized from the FlashVar string *before*
+  first use, not near the unrelated `autoBattle` normalization further
+  down the same frame script - this is sequential top-level frame code,
+  not a function, so normalizing after the gates had already evaluated
+  the raw truthy string would have made the toggle always-on). The
+  cosmetic armor/manacle tier (`typeArmor`/`typeManacle` - which outfit
+  renders, not a stat) still auto-adjusts regardless, and
+  `startBossFight()`'s own unconditional `grantAllCards()`/
+  `gearUpForMission(15)` (the boss-fight fair-fight guarantee) is
+  untouched.
+
 ## Other gated content found but not yet unlocked
 
 A survey for other "Buguese-style" content — stuff fully coded but gated
