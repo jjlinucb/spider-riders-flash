@@ -902,6 +902,27 @@ success as proof the sandbox issue is gone.
   and toggles normally, but since the new fix mutes downstream of the
   SWF's own mixer, clicking "unmute" in-game no longer actually produces
   sound. The icon is now decorative with respect to audible output.
+- **Boost (yellow) cards with dice value +3 and up never reach Deck A,
+  even the ones `gearUpForMission()` grants.** Confirmed: Deep Freeze(3),
+  Super Size(3), Poison Fang(4), Barbecue(5), Intervention(7), Warrior
+  path(8), and Arachna power(10) all cost 300g-1400g, which
+  `deckForCard()` buckets into deck 3 or 6 - neither is in Deck A's
+  filter (`[1,4,5,7]`, effectively only 5 and 7 since nothing ever
+  produces 1 or 4). `gearUpForMission(15)` does grant Intervention
+  (`minMission:11`) as part of its curated gear list, but since it's
+  tagged via `deckForCard()` like everything else, it still lands in
+  deck 6 and still never shows up in a boss fight's Deck A. Requested
+  directly: guarantee 2 copies each of the dice+5 (Barbecue) and dice+7
+  (Intervention) cards for boss fights specifically, tagged so they
+  actually land in Deck A regardless of their real gold cost. Added
+  `grantBossBoostCards()` (`scripts/frame_10/DoAction.as`, right before
+  `gearUpForMission`) - counts existing copies of ids 508/509 in
+  `playerStats.card`, tops each up to 2 if short (never removes extras
+  if you already own more), tagging any newly-added copies `deck:7` (the
+  same "always in every deck" tag mission/guild pickups use) instead of
+  their real cost tier. Called from `startBossFight()` right after
+  `grantStrongCards()`. Verified via isolated diff: only this one file
+  changed, exactly the new function plus the one call-site addition.
 
 ## Other gated content found but not yet unlocked
 
