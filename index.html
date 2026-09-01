@@ -378,6 +378,14 @@
 <div id="status" class="hidden"></div>
 
 <script>
+  // The original SWF calls out to this via getURL("javascript:urchinTracker(...)")
+  // for legacy Google Analytics pageview pings (urchin.js, not wired into this
+  // rebuild - no tracking account configured anyway). Left undefined, every
+  // call threw an uncaught ReferenceError, which happens on nearly every scene
+  // transition throughout the whole game (checked: dozens of shell frames call
+  // it). Stub it out so those calls no-op instead of throwing.
+  window.urchinTracker = function() {};
+
   window.RufflePlayer = window.RufflePlayer || {};
 
   window.addEventListener("DOMContentLoaded", () => {

@@ -606,6 +606,107 @@ success as proof the sandbox issue is gone.
   `battleSystem.initBattle`, which already exists to absorb exactly this
   kind of load-time gap. Confirmed working live (Prince Lumens loaded and
   was playable straight from the dropdown, no preload wait).
+- **Register and Save Avatar: "please wait" dialog that never closes.**
+  `subscribeUser()` and `updatePlayer()` (`SpiderRider/.../frame_2/DoAction.as`)
+  both unconditionally pushed a `callObj`, called `processCall()` (a no-op —
+  its entire body is gated on `callScriptEnable`, hardcoded `false` and never
+  set `true` anywhere), and then unconditionally called
+  `criticMsgWindow.drawWindow(...)` with no guard. Since `loadMc.onData =
+  handleReply` is only ever assigned inside that same dead
+  `if(callScriptEnable)` branch in `processCall()`, `handleReply()` — the only
+  thing that ever calls `criticMsgWindow.closeWindow()` — can never fire, so
+  the dialog opens and never closes. `tryLogin()`, right next to both of
+  these in the same file, already had the correct pattern: check
+  `callScriptEnable` first, short-circuit when false. `updatePlayer()` is
+  reachable from a "Save Avatar" button (`DefineButton2_1877`) plus ~19
+  mission/menu-frame `onClipEvent(load)` handlers; `subscribeUser()` from the
+  three Register-screen buttons/clips. Fixed both to match `tryLogin()`'s
+  shape: the whole network/dialog portion moved inside
+  `if(callScriptEnable){...}`. `subscribeUser()`'s `else` closes the register
+  sub-window directly (`loginWindow.registerWindow.closeWindow()` — the same
+  call the real server-success path already used, confirmed by reading the
+  `"subscribeuser"` case in `handleReply()`). `updatePlayer()`'s `else` does
+  nothing: `updateAllCards()` (the one part of the function with no network
+  dependency) still runs unconditionally before the `if`, and the real
+  server-success path for `updatePlayer()`'s call (`"newplayer"`) turned out
+  to just fall through to `handleReply()`'s `default: processCall();` — no
+  state change beyond closing a dialog that, offline, was never opened.
+  Verified via a clean isolated diff: re-exporting the whole 808-file script
+  tree after reimport shows only `frame_2/DoAction.as` changed, and within
+  it, only these two functions. (Reimporting this file also required
+  stripping a pre-existing decompiler artifact unrelated to this fix — a
+  `loop16:` switch label plus its unreachable `break loop16;`, dead code
+  after an unconditional `continue;` in `xmlLoaded()` — FFDec's script
+  importer rejects the file otherwise; confirmed cosmetic-only, since
+  re-exporting after reimport does not reintroduce it and no other line
+  changed.) **Not confirmed with a live playthrough** — this session's
+  Ruffle instance stalled on the preloader animation before reaching the
+  login screen in two separate fresh tabs (`document.visibilityState` stuck
+  `"hidden"`), the same pre-existing sandbox flakiness noted elsewhere in
+  this file, not something this fix could have caused. The fix logic itself
+  is static — a straight `if/else` gate on a flag that is always `false` —
+  so live confirmation would only be re-proving the mechanism already
+  verified by the clean diff, but it's still genuinely unconfirmed by an
+  actual playthrough.
+- **Dice roll: game stalls right after rolling, cards can't be dragged.**
+  Reported directly from a live playthrough: cards dealt into the hand fine,
+  clicking "Throw the dice" rolled correctly, then the game just sat there —
+  dice couldn't be dragged onto cards. Root cause,
+  `battleSystem/scripts/DefineSprite_3152/frame_1/DoAction_9.as`:
+  `CumulateRedDice()` moves red dice to the attack-total display one at a
+  time via a chained `setInterval`/`onEnterFrame` handoff, but had no
+  fallback for "no red dice left" — its `for(var _loc1_ in Dices)` loop just
+  did nothing when it matched nothing, so the interval it was called from
+  kept firing forever and `CumulateBlueDice()` (the function that sets
+  `MODE_CARD`) was never reached. Dice can only be dragged onto cards when
+  `CurrentMode == MODE_CARD` (checked in the dice's own `on(press)` handler,
+  `DefineButton2_2638`), so this one missing branch explains both symptoms:
+  any roll with zero or now-fully-processed red dice soft-locks the turn.
+  Fixed by tracking whether a red die was found each pass; if not, clear the
+  interval and call `CumulateBlueDice()` directly. Also fixed a second,
+  related bug in the same file: `RemoveWhiteDice()` called
+  `Dices[_loc1_].splice(_loc1_,1)` — `.splice()` on a single dice
+  *MovieClip*, not on the `Dices` array — so white dice were flagged removed
+  visually but never actually left the tracked array (compare
+  `CumulateRedDice()`'s own correct `Dices.splice(_loc1_,1)` a few lines
+  down). Rewrote it as a reverse-indexed loop splicing the array directly,
+  avoiding the original's implicit assumption that a forward `for...in`
+  tolerates live mutation. Verified via isolated diff: only this file
+  changed, only these two functions. **Not confirmed with a live
+  playthrough on my end** — this session's Ruffle instance stopped
+  responding to synthetic clicks entirely (the same sandbox
+  `document.visibilityState` quirk, confirmed this time by a click that
+  produced zero pixel change), so this needs a real playthrough to close
+  the loop.
+- **Boss fights redirect into Mission 1 instead of starting the battle.**
+  With the charWindow-reopening race above already fixed, boss fights
+  (Buguese/Magma/Stag/Prince Lumens, instant-launch path) still didn't
+  work: confirmed via live trace that `startBossFight()` runs and calls
+  `battleSystem.initBattle(...)` correctly, but the screen then shows
+  "MISSION 1 / READY" instead of the battle. Root cause: the instant-launch
+  path's `gotoAndStop(54)` — per this project's own confirmed AS2 semantics
+  — synthesizes every intervening frame's DisplayList, including frame 48's
+  `emptyClip` (the normal, non-boss world-hub preload placeholder). Frame
+  48's `onClipEvent(load)` unconditionally calls
+  `loadWindow.setLoader(this, fct, ...)`, hijacking the shared `loadWindow`
+  spinner's target away from `battleSystem` (which `frame_10` had correctly
+  registered moments earlier) — the same class of bug as the charWindow
+  race, a second caller nobody had accounted for. Because the hijacked
+  `emptyClip` never actually has a real `loadMovie()` call run against it
+  during the skip-jump, `loadWindow`'s progress poll reads it as instantly
+  "fully loaded" and fires the hijacked callback, which does
+  `root.nextFrame()` — landing on the frame labeled `"level1"` and loading
+  Mission 1's map instead. Fixed the same way as the charWindow race: the
+  existing `bossReadyPoll` watchdog in `startBossFight()`
+  (`frame_10/DoAction.as`) now also re-pins `root.loadWindow.target` back
+  to `root.battleSystem` (and `loadFct` back to a no-op) on every 100ms
+  tick, for the same ~3s window — faster than any hijacker's near-instant
+  completion can act on a stolen registration. Verified via isolated diff:
+  7 lines added, one function, nothing else touched. **Bug reproduction
+  confirmed live** (trace log + screenshot showing the Mission 1 splash);
+  **the fix itself could not be re-confirmed live** — same sandbox
+  rendering-stall as above, hit on every retry across fresh tabs for the
+  rest of the session.
 
 ## Other gated content found but not yet unlocked
 
