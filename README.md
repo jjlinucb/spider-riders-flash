@@ -1120,6 +1120,18 @@ success as proof the sandbox issue is gone.
   (only `frame_10/DoAction.as` changed: the `deckForCard`/`grantAllCards`
   bodies, the new `cardDeckTier` array, and the one added
   `root.deckActive = "A"` line).
+- **Weapon Master (id 410) removed from Deck A.** Corrected after
+  user testing: this card was tiered `5` (A+C) on the assumption it doubled
+  damage outright. Its actual battle-code effect (`PlaceObject2_2941_394`/
+  `PlaceObject2_2966_441` in `battleSystem_2.swf`, guarded by
+  `BattleSystem.wpnMasterEq`) is `BattleSystem.DiceRed += BattleSystem.DiceRed`
+  - it doubles whatever red-dice value is already rolled that turn (e.g. a
+  roll of 2 becomes 4), not a flat damage multiplier, which makes it far
+  weaker than the tiering assumed. Retiered to `3` (C only) in
+  `cardDeckTier` so it no longer surfaces under the Deck A tab - it's still
+  obtainable via Deck C, which is meant to hold the full catalog regardless.
+  Verified via isolated `-export script` diff (only that one `{id:410,...}`
+  entry in `cardDeckTier` changed, `tier:5` → `tier:3`).
 - **Missions 6, 7, and 14: fixed the same dead `newTile.j1`/`.k1` web-climb
   bug as mission 13** (previously noted in Known Issues). Confirmed via
   grep that `scr6_2.swf`, `scr7_2.swf`, and `scr14_2.swf` have the identical
