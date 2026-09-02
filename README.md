@@ -1087,6 +1087,39 @@ success as proof the sandbox issue is gone.
   isolated `-export script` diff against the already-deployed
   first-pass file (only those two files changed, exactly the `.j1`/`.k1` →
   `.ytile`/`.xtile` swaps).
+- **Deck A/B/C: hand-curated card lists and multi-copy grants, replacing the
+  price formula.** Requested directly, after designing the actual card list
+  interactively (an HTML deck-builder tool covering all 61 cards, one row
+  per owned copy with a tier dropdown per copy - not checked into this repo,
+  it was a scratch planning aid). `deckForCard(cardId)` (`frame_10/
+  DoAction.as`) no longer buckets by shop price; it now looks the id up in a
+  new `cardDeckTier` array of `{id, tier}` pairs sitting right next to
+  `cardData` (tier is the same 1-7 combo code used everywhere else in this
+  file - 3=C only, 5=A+C, 6=B+C, 7=all three; this build never assigns a
+  card to A or B without also including C, since Deck C is meant to always
+  hold everything). Editing which deck(s) a card belongs to going forward is
+  just editing that one array. `grantAllCards()` was rewritten around the
+  same `wantCounts`/owned-count-and-top-up idiom `grantBossBoostCards()`
+  already used elsewhere in this file, so a single call now grants the
+  entire 61-card catalog at once with the right number of copies each (most
+  cards 1, a hand-picked set of staples 2-3) instead of one copy of
+  everything - 74 card instances total across the 61 ids when "Cheats" is
+  ticked on the mission-select screen. The `wantCounts` array's entries are
+  deliberately ordered so the first 8 pushes are always the same specific
+  cards in the same specific order - Deck A's guaranteed opening hand
+  (7 hand slots + 1 card on top of the draw pile, since nothing in this
+  game's battle code shuffles `Player.CardDeck` - it deals straight through
+  `playerStats.card` in array order, confirmed by reading `frame_1/
+  DoAction_6.as`/`DoAction_9.as` in `battleSystem_2.swf`): 2x The Kleaver,
+  Elite Plate Armor, Positive attitude, Cutie pie, Gift from Oracle, Red
+  Oracle key, Green Oracle key (on deck). `root.deckActive = "A"` now also
+  gets set alongside `grantAllCards()` in the Cheats branch (mirroring the
+  existing boss-fight pattern one function up) so those Deck-A-tagged cards
+  actually get pulled into `Player.CardDeck` instead of sitting unused
+  under a different active tab. Verified via isolated `-export script` diff
+  (only `frame_10/DoAction.as` changed: the `deckForCard`/`grantAllCards`
+  bodies, the new `cardDeckTier` array, and the one added
+  `root.deckActive = "A"` line).
 
 ## Other gated content found but not yet unlocked
 
