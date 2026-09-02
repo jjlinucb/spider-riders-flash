@@ -1173,6 +1173,29 @@ success as proof the sandbox issue is gone.
   leave dead code behind. Verified via isolated `-export script` diff
   (only `frame_10/DoAction.as` changed: the two function definitions
   removed, and the two calls inside `startBossFight()` collapsed to one).
+- **New rule: the undrawn card on top of the deck no longer gets discarded
+  at end of turn if a hand slot is free.** User-reported: when your 7-card
+  hand is full, a new draw sits visibly "on top of the deck" until a hand
+  slot opens up. Previously, `RemoveCard()` (`battleSystem_2.swf`,
+  `DefineSprite_3152/frame_1/DoAction_5.as` - the end-of-turn cleanup that
+  sends played boost/action cards to the Cemetery) unconditionally sent
+  whatever was sitting in `Deck.Card` to the Cemetery too, with no check at
+  all - so if you played cards during your turn (freeing up a hand slot)
+  but never manually dragged the on-deck card into that opening yourself,
+  it was discarded outright at end of turn instead of ever reaching your
+  hand. `NextTurn()` (same file) already had the right logic for the
+  post-draw case - check `PlayerFindEmptySlot()` and slot the card into
+  hand if one's open, otherwise leave it on top of the deck - so
+  `RemoveCard()`'s unconditional discard just never matched that behavior.
+  Reused the identical `PlayerFindEmptySlot()` check in `RemoveCard()`: if
+  a hand slot is open, the on-deck card now moves into it instead of the
+  Cemetery; if the hand is still full, it's left on top of the deck for
+  next turn rather than force-fed into a full hand or discarded. Scoped to
+  the player's side only, matching `NextTurn()`'s existing asymmetry (no
+  `OpponentFindEmptySlot()` exists in this codebase - the opponent's
+  on-deck handling was never symmetric with the player's to begin with).
+  Verified via isolated `-export script` diff (only that one `if(Deck.Card
+  != VoidCard){...}` block in `RemoveCard()` changed).
 
 ## Other gated content found but not yet unlocked
 
