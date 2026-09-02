@@ -1055,26 +1055,38 @@ success as proof the sandbox issue is gone.
 - **Mission 13: fixed a web-descend point that stranded the player
   permanently on a rooftop ledge.** User-reported: climbing up a wall via
   the spider web worked, but using the web again on that same ledge to
-  climb back down did nothing - no way back to the ground. Traced to
-  `scr13_2.swf`'s `frame_4/PlaceObject2_805_108` (the drop zone behind
-  `game.web1`, one of three vertical web-climb points on this mission's
-  map): the up/down pair is declared as `newObj = {lvl:0,j1:45,k1:33}`
-  (ground) and `newObj2 = {lvl:1,j1:37,k1:23}` (the ledge), but the
-  dispatcher's own tile-match checks for the ledge case were hardcoded to
-  `j1 <= 35` and `j1 == 35` - two off by exactly the `j1:37` the object
-  itself declares. Landing on the real ledge tile (37) never satisfied
-  either check, so the code fell through to the catch-all branch, which
-  tries to walk the player toward the *ground* trigger tile instead of
-  firing the descend - a walk that can't succeed from up on the ledge,
-  leaving the player stuck. This is a bug in the original 2007 SWF's
-  authoring (most likely a leftover from an earlier tile layout that
-  shifted `j1` from 35 to 37 for the object but not for the two checks
-  reading it), not something any prior patch introduced - the sibling
-  climb point (`PlaceObject2_805_112`, `game.web3`) declares and checks
-  the same literal consistently and was never affected. Fixed by changing
-  both `35`s to `37` to match `newObj2`'s own declared tile. Verified via
-  isolated `-export script` diff (only this one file changed, exactly
-  those two literals).
+  climb back down did nothing - no way back to the ground. This took two
+  passes to actually fix. First pass (incomplete): `scr13_2.swf`'s
+  `frame_4/PlaceObject2_805_108` (the drop zone behind `game.web1`, one of
+  three vertical web-climb points on this mission's map) declares its
+  up/down pair as `newObj = {lvl:0,j1:45,k1:33}` (ground) and
+  `newObj2 = {lvl:1,j1:37,k1:23}` (the ledge), but the dispatcher's tile-
+  match checks for the ledge case were hardcoded to `j1 <= 35` and
+  `j1 == 35` - two off from the `j1:37` the object itself declares.
+  Shipped that literal fix (`35`→`37`), but the player reported it made no
+  difference at all - now completely unresponsive rather than stuck with
+  the wrong behavior. That mismatch pointed at a deeper problem: `game.
+  newTile` (the character's live tile, built by `getTileInfo()` in
+  `frame_2/DoAction.as`) only ever carries `.xtile`/`.ytile` fields - there
+  is a `convertTile()` function that maps those to the `.j1`/`.k1` names
+  these dispatchers check, but grepping the whole mission confirms it is
+  never called anywhere. So `game.newTile.j1` and `.k1` are `undefined` on
+  every single check, always - the `35`-vs-`37` literal never mattered,
+  because the branch reading it can't evaluate true no matter what the
+  literal is. That's a bug in the original 2007 SWF's authoring, confirmed
+  byte-identical against the pre-patch `decompiled/scr13/` reference, not
+  something any prior patch introduced - and it isn't unique to mission
+  13: the same `newTile.j1`/`.k1` pattern turned up in missions 6, 7, and
+  14 too (not fixed here - out of scope until reported, noted below).
+  Real fix: swap `.j1`→`.ytile` and `.k1`→`.xtile` in the dispatcher's tile
+  checks (the `getTileInfo()` return shape), in both `PlaceObject2_805_108`
+  (`game.web1`, keeping the `37` literal fix from the first pass) and the
+  sibling climb point `PlaceObject2_805_112` (`game.web3` - same dead-
+  property bug, not yet reported broken but certain to hit the same wall,
+  fixed proactively since it's the identical pattern). Verified via
+  isolated `-export script` diff against the already-deployed
+  first-pass file (only those two files changed, exactly the `.j1`/`.k1` →
+  `.ytile`/`.xtile` swaps).
 
 ## Other gated content found but not yet unlocked
 
@@ -1137,6 +1149,14 @@ python3 -m http.server 8000
 
 - **Audio**: not verified either way — nobody's confirmed whether music/sound
   effects actually play through Ruffle yet.
+- **Missions 6, 7, and 14 likely have the same dead `newTile.j1`/`.k1` web-
+  climb bug fixed in mission 13** (see the mission 13 web-descend entry
+  above for the full root cause). Confirmed via grep that the same
+  `game.newTile.j1`/`game.newTile.k1` pattern (always `undefined`, since
+  nothing ever populates those fields on the character's live tile) exists
+  in `scr6_2.swf`, `scr7_2.swf`, and `scr14_2.swf`'s equivalent drop zones,
+  but none of these have been reported broken or fixed yet - out of scope
+  until someone hits it.
 
 ## Contributing
 
