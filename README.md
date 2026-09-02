@@ -1120,6 +1120,47 @@ success as proof the sandbox issue is gone.
   (only `frame_10/DoAction.as` changed: the `deckForCard`/`grantAllCards`
   bodies, the new `cardDeckTier` array, and the one added
   `root.deckActive = "A"` line).
+- **Missions 6, 7, and 14: fixed the same dead `newTile.j1`/`.k1` web-climb
+  bug as mission 13** (previously noted in Known Issues). Confirmed via
+  grep that `scr6_2.swf`, `scr7_2.swf`, and `scr14_2.swf` have the identical
+  pattern: drop-zone dispatchers checking `game.newTile.j1`/
+  `game.newTile.k1`, which are always `undefined` since `game.newTile` only
+  ever carries `.xtile`/`.ytile`. Read all 19 affected files (6 in
+  `scr6_2.swf`, 7 in `scr7_2.swf`, 6 in `scr14_2.swf` — vertical web-climb
+  pairs, a couple of horizontal "run across" variants, and one item-drop
+  "board" puzzle in `scr7_2.swf` that reads the same
+  `game.newTile.j1`/`.k1`) before touching anything, specifically checking
+  whether any of them also had mission 13's original literal-value mismatch
+  on top of the dead-property bug. None did — every tile-value pair already
+  lined up with what its own `newObj`/`newObj2` declared; the property name
+  was the only thing wrong everywhere. Applied the same mechanical swap as
+  mission 13 (`.j1`→`.ytile`, `.k1`→`.xtile`) to all 19 dispatcher
+  functions, leaving the unrelated `newObj = {...,j1:..,k1:..}` struct
+  literals untouched (those are just this code's own naming for a tile-
+  coordinate pair, not reads of `game.newTile`). Verified via isolated
+  `-export script` diff per SWF — exactly those 19 files changed in each,
+  each collapsing to the same two substituted lines, nothing else.
+- **Boss-fight shortcut: fixed the curated Deck A opening hand not showing
+  up when jumping straight into a boss.** User-reported: using the
+  mission-select "Cheats" boss shortcuts (Buguese/Magma/Stag/Prince Lumens)
+  put all the right cards in Deck A, just not in the intended top-8
+  opening-hand order from the deck redesign above. Root cause:
+  `startBossFight()` (`frame_10/DoAction.as`) predates that rewrite and
+  never called the new `grantAllCards()` — it still called the old
+  `grantStrongCards()`/`grantBossBoostCards()` pair, which push cards in
+  plain ascending-id order (`grantStrongCards()`) plus a separate,
+  differently-ordered boss-specific list (`grantBossBoostCards()`). Since
+  nothing in the battle code shuffles `Player.CardDeck` — draw order is
+  exactly `playerStats.card` array order — jumping straight to a boss fight
+  built that array in the wrong order for the guaranteed opening hand, even
+  though every card in it was still correctly tagged for Deck A. Fix:
+  replaced both calls with a single `grantAllCards()`, which grants the
+  same (and now more complete) set of cards in the curated `wantCounts`
+  order used everywhere else. `grantStrongCards()`/`grantBossBoostCards()`
+  had no other callers anywhere in the file, so removed them rather than
+  leave dead code behind. Verified via isolated `-export script` diff
+  (only `frame_10/DoAction.as` changed: the two function definitions
+  removed, and the two calls inside `startBossFight()` collapsed to one).
 
 ## Other gated content found but not yet unlocked
 
@@ -1182,14 +1223,6 @@ python3 -m http.server 8000
 
 - **Audio**: not verified either way — nobody's confirmed whether music/sound
   effects actually play through Ruffle yet.
-- **Missions 6, 7, and 14 likely have the same dead `newTile.j1`/`.k1` web-
-  climb bug fixed in mission 13** (see the mission 13 web-descend entry
-  above for the full root cause). Confirmed via grep that the same
-  `game.newTile.j1`/`game.newTile.k1` pattern (always `undefined`, since
-  nothing ever populates those fields on the character's live tile) exists
-  in `scr6_2.swf`, `scr7_2.swf`, and `scr14_2.swf`'s equivalent drop zones,
-  but none of these have been reported broken or fixed yet - out of scope
-  until someone hits it.
 
 ## Contributing
 
