@@ -519,9 +519,10 @@
             ...(speedDoubled ? { frameRate: 60 } : {}),
           })
           .then(() => {
-            // Start muted - the in-game speaker icon (top right of the
-            // stage) still toggles it back on, this only changes the
-            // default. This has to happen here, in load()'s resolution
+            // Start at a low but audible volume (not muted) - the in-game
+            // speaker icon (top right of the stage) still raises/lowers/
+            // mutes it from here, this only changes what a fresh page load
+            // starts at. This has to happen here, in load()'s resolution
             // handler, rather than right after createPlayer() above (which
             // is where an earlier version of this patch set it): Ruffle's
             // <ruffle-player>.volume setter (ruffle-vendor/ruffle.js)
@@ -535,7 +536,17 @@
             // decoding audio yet - that begins via a fire-and-forget call
             // made just before this promise settles - so this reliably
             // lands before any sound could actually be heard.
-            player.volume = 0;
+            //
+            // This is a master ceiling on top of the SWF's own independent
+            // AS2 audio mixer (root.setNewVolume()/sVol, frame_1/DoAction.as,
+            // which already defaults to a moderate 50/100 - GAMEDEBUG is
+            // sent as "" from this file, so !GAMEDEBUG is true and
+            // currentV=50 - untouched here): final loudness is Ruffle's
+            // volume multiplied by the SWF's own internal level, so the
+            // in-game speaker icon's mute/unmute and any in-game volume
+            // control still work exactly as before, just scaled down from
+            // this lower starting ceiling instead of from silence.
+            player.volume = 0.15;
             setStatus("");
           })
           .catch((e) => {

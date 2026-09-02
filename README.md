@@ -1014,6 +1014,44 @@ success as proof the sandbox issue is gone.
   `frame_10/DoAction.as` changed, exactly the three functions plus the
   boot-branch simplification) and a syntax check on the extracted inline
   `<script>` for the `index.html` side.
+- **Victory Pts / rank corruption, root-caused and fixed** (supersedes the
+  entry previously in Known Issues). The HUD's "VICTORY PTS" field
+  (`optionBar.scoreTxt`, `DefineSprite_1960` on the main timeline) turned
+  out to have two independent things writing to it at once: the game's own
+  script (`scoreTxt.text = root.playerStats.victory`, same file's
+  `frame_1/DoAction.as`) *and* a leftover Flash-authoring "variable"
+  binding baked into the `DefineEditText` tag itself, pointed at that exact
+  same path (confirmed via `ffdec -dumpSWF`: `vn: "root.playerStats.victory"`
+  on character 1959). Any text field authored with a non-empty `variable`
+  name auto-syncs bidirectionally in Flash - so the instant the field's
+  displayed text was set to a Number, the binding silently wrote the
+  *string* back into `root.playerStats.victory`, converting it from Number
+  to String. From then on every reward pickup (`playerStats.victory +=
+  ptsVictory`) did AS2 string concatenation instead of addition - e.g.
+  starting at a round `54000` plus two 27-point kills becomes `"54000" +
+  "27" + "27"` = `540002727`, exactly the garbled digits reported. Fixed
+  two ways: (1) root cause - stripped the stray `variable` binding from the
+  `DefineEditText` tag (character 1959) by loading the SWF through
+  `ffdec_lib.jar` directly (no CLI flag exposes editing a tag's variable
+  name) and setting it to `""`, verified via `-dumpSWF` diff (tag shrinks
+  from 55 to 31 bytes, `vn:` gone) and a full `-export script` diff
+  (zero AS differences - only that one tag's binary changed); (2) defensive
+  backstop - `frame_1/DoAction.as` of `DefineSprite_1960` now force-recoerces
+  `root.playerStats.victory = Number(root.playerStats.victory)` both on
+  load and at the top of the existing `onEnterFrame` watcher, so even an
+  unknown future write-back gets neutralized before any `+=` can
+  concatenate onto it. Verified via isolated `-export script` diff (only
+  this one file changed, exactly the two new lines).
+- **Sound: on by default, but quiet.** `index.html` previously set
+  `player.volume = 0` right after Ruffle finishes loading, muting the game
+  by default (the in-game speaker icon could still toggle it back on, but
+  most players never found it). Changed to `player.volume = 0.15` - audible
+  but deliberately quiet on a fresh load. This is a master ceiling on top
+  of the SWF's own independent AS2 audio mixer (`root.setNewVolume()`/
+  `sVol`, `frame_1/DoAction.as`), which already defaults to a moderate
+  50/100 internally and is untouched by this change - the in-game speaker
+  icon's mute/unmute still works exactly as before, just scaled from this
+  lower ceiling instead of from silence. Pure JS, no SWF patch.
 
 ## Other gated content found but not yet unlocked
 
@@ -1074,14 +1112,6 @@ python3 -m http.server 8000
 
 ## Known issues
 
-- **Victory Pts / rank corruption**: the Victory Pts counter can end up showing a
-  huge garbled number instead of `0`. A per-frame watcher
-  (`decompiled/SpiderRider/script/scripts/DefineSprite_1960/frame_1/DoAction.as`)
-  recomputes rank from that value via `getRankValue2()`
-  (`decompiled/SpiderRider/script/scripts/frame_2/DoAction.as`), whose top tier
-  is just "≥ 58000" with no upper bound — so the bad value immediately maxes out
-  attack/defense/health stats. Root cause of *why* Victory Pts gets corrupted in
-  the first place hasn't been traced yet.
 - **Audio**: not verified either way — nobody's confirmed whether music/sound
   effects actually play through Ruffle yet.
 
