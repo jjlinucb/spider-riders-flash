@@ -1052,6 +1052,29 @@ success as proof the sandbox issue is gone.
   50/100 internally and is untouched by this change - the in-game speaker
   icon's mute/unmute still works exactly as before, just scaled from this
   lower ceiling instead of from silence. Pure JS, no SWF patch.
+- **Mission 13: fixed a web-descend point that stranded the player
+  permanently on a rooftop ledge.** User-reported: climbing up a wall via
+  the spider web worked, but using the web again on that same ledge to
+  climb back down did nothing - no way back to the ground. Traced to
+  `scr13_2.swf`'s `frame_4/PlaceObject2_805_108` (the drop zone behind
+  `game.web1`, one of three vertical web-climb points on this mission's
+  map): the up/down pair is declared as `newObj = {lvl:0,j1:45,k1:33}`
+  (ground) and `newObj2 = {lvl:1,j1:37,k1:23}` (the ledge), but the
+  dispatcher's own tile-match checks for the ledge case were hardcoded to
+  `j1 <= 35` and `j1 == 35` - two off by exactly the `j1:37` the object
+  itself declares. Landing on the real ledge tile (37) never satisfied
+  either check, so the code fell through to the catch-all branch, which
+  tries to walk the player toward the *ground* trigger tile instead of
+  firing the descend - a walk that can't succeed from up on the ledge,
+  leaving the player stuck. This is a bug in the original 2007 SWF's
+  authoring (most likely a leftover from an earlier tile layout that
+  shifted `j1` from 35 to 37 for the object but not for the two checks
+  reading it), not something any prior patch introduced - the sibling
+  climb point (`PlaceObject2_805_112`, `game.web3`) declares and checks
+  the same literal consistently and was never affected. Fixed by changing
+  both `35`s to `37` to match `newObj2`'s own declared tile. Verified via
+  isolated `-export script` diff (only this one file changed, exactly
+  those two literals).
 
 ## Other gated content found but not yet unlocked
 
