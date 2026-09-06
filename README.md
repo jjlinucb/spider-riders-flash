@@ -1196,6 +1196,38 @@ success as proof the sandbox issue is gone.
   on-deck handling was never symmetric with the player's to begin with).
   Verified via isolated `-export script` diff (only that one `if(Deck.Card
   != VoidCard){...}` block in `RemoveCard()` changed).
+- **Mission 5 & Mission 12: NPC dialog boxes re-triggering instead of
+  advancing.** Two Discord reports: in Mission 5, giving the woodsman (the
+  "carpenter") the door key just kept re-showing his first line instead of
+  letting the hand-off complete; in Mission 12, walking near an NPC close to
+  the mission start looped the same dialog box repeatedly. Both missions
+  share one engine (`scr5_2.swf`/`scr12_2.swf`, `frame_2/DoAction.as`):
+  `registerWalkZone()`/`registerDropZone()` push a zone onto
+  `walkZoneArray`/`zoneArray` with no check for it already being there, and
+  `unregisterWalkZone()`/`unregisterDropZone()` remove a zone with
+  `for(var i in array){ if(array[i]==zone) array.splice(i,1); }` - a
+  for-in loop mutating the array mid-iteration, which can leave a stale
+  duplicate entry unremoved once a zone has been registered more than once.
+  Mission 5's woodsman drop-zone (`frame_56/PlaceObject2_586_130`) hits this
+  directly: its `fct(item)` unconditionally called
+  `game.registerWalkZone(game.woodmanZone)` on *every* drop attempt,
+  including failed/mismatched ones, so the "I lost my key" walk-up greeting
+  (only meant to show before the key is ever found) kept getting re-armed
+  duplicate-on-duplicate while the player was actively trying to hand the
+  key over, re-showing itself and blocking the give-item flow from visibly
+  completing. Fixed with two changes: (1) `registerWalkZone()` and
+  `registerDropZone()` now scan for the zone before pushing (no-op if
+  already registered) and `unregisterWalkZone()`/`unregisterDropZone()` now
+  walk the array backwards (`length-1` down to `0`) instead of using
+  for-in, so a removal can never skip a duplicate - applied identically to
+  both `scr5_2.swf` and `scr12_2.swf` since it's the same shared engine
+  code; (2) in `scr5_2.swf` only, the woodsman drop-zone's re-arm is now
+  guarded with `if(game.doorKey < 1)`, so the "I lost my key" greeting
+  stops re-registering itself once the player already has the key in hand.
+  Verified via isolated `-export script` diff on both SWFs (only
+  `registerWalkZone`/`unregisterWalkZone`/`registerDropZone`/
+  `unregisterDropZone` in `frame_2/DoAction.as`, plus the one `if` added in
+  `scr5`'s woodsman zone, changed).
 
 ## Other gated content found but not yet unlocked
 

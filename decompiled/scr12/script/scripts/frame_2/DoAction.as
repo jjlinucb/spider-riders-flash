@@ -603,32 +603,56 @@ function removeObject(obj)
 }
 function registerWalkZone(zone)
 {
+   var _loc2_ = zone;
+   var _loc1_ = 0;
+   while(_loc1_ < walkZoneArray.length)
+   {
+      if(walkZoneArray[_loc1_] == _loc2_)
+      {
+         return;
+      }
+      _loc1_ = _loc1_ + 1;
+   }
    walkZoneArray.push(zone);
 }
 function unregisterWalkZone(zone)
 {
    var _loc2_ = zone;
-   for(var _loc1_ in walkZoneArray)
+   var _loc1_ = walkZoneArray.length - 1;
+   while(_loc1_ >= 0)
    {
       if(walkZoneArray[_loc1_] == _loc2_)
       {
          walkZoneArray.splice(_loc1_,1);
       }
+      _loc1_ = _loc1_ - 1;
    }
 }
 function registerDropZone(zone)
 {
+   var _loc2_ = zone;
+   var _loc1_ = 0;
+   while(_loc1_ < zoneArray.length)
+   {
+      if(zoneArray[_loc1_] == _loc2_)
+      {
+         return;
+      }
+      _loc1_ = _loc1_ + 1;
+   }
    zoneArray.push(zone);
 }
 function unregisterDropZone(zone)
 {
    var _loc2_ = zone;
-   for(var _loc1_ in zoneArray)
+   var _loc1_ = zoneArray.length - 1;
+   while(_loc1_ >= 0)
    {
       if(zoneArray[_loc1_] == _loc2_)
       {
          zoneArray.splice(_loc1_,1);
       }
+      _loc1_ = _loc1_ - 1;
    }
 }
 function addArrow(obj)

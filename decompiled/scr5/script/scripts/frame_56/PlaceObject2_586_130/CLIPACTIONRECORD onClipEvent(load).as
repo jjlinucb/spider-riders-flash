@@ -3,7 +3,10 @@ onClipEvent(load){
    newObj = {lvl:0,j1:27,k1:39};
    fct = function(item)
    {
-      game.registerWalkZone(game.woodmanZone);
+      if(game.doorKey < 1)
+      {
+         game.registerWalkZone(game.woodmanZone);
+      }
       if(item == "doorKeyItem" && game.doorKey == 1)
       {
          newObj.fct = function()

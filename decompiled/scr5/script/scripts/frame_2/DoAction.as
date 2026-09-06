@@ -21,11 +21,10 @@ function initMapHeight()
    var xl = collMap.length;
    var _loc3_ = collMap[0].length;
    var _loc2_ = 0;
-   var _loc1_;
    while(_loc2_ < xl)
    {
       heightMap[_loc2_] = new Array(_loc3_);
-      _loc1_ = 0;
+      var _loc1_ = 0;
       while(_loc1_ < _loc3_)
       {
          heightMap[_loc2_][_loc1_] = 0;
@@ -45,10 +44,9 @@ function cleanUpScr()
    zoneArray = new Array();
    tileSpecial = new Array();
    tileTransit = new Array();
-   var _loc1_;
    for(var _loc2_ in itemContainer)
    {
-      _loc1_ = itemContainer[_loc2_];
+      var _loc1_ = itemContainer[_loc2_];
       if(typeof _loc1_ == "movieclip")
       {
          if(_loc2_ != "char")
@@ -179,13 +177,11 @@ function setScr()
    char._x = posInfo.x;
    char._y = posInfo.y;
    var _loc2_ = 0;
-   var _loc1_;
-   var _loc3_;
    while(_loc2_ < tileSpecial.length)
    {
-      _loc1_ = tileSpecial[_loc2_];
+      var _loc1_ = tileSpecial[_loc2_];
       var x2 = _loc1_.xt * tileW;
-      _loc3_ = _loc1_.yt * tileW;
+      var _loc3_ = _loc1_.yt * tileW;
       var xPos = x2 - _loc3_ + 2 * tileH;
       var yPos = (x2 + _loc3_) / 2 - _loc1_.lvl % 2 * tileH + tileW;
       targetItem = itemContainer.attachMovie(_loc1_.type,"item" + _loc2_,depthMap[_loc1_.lvl][_loc1_.yt][_loc1_.xt] * itemDepth);
@@ -198,10 +194,9 @@ function getLvlHeight(xt, yt)
 {
    var _loc3_ = yt;
    var _loc1_ = 0;
-   var _loc2_;
    while(_loc1_ < map.length)
    {
-      _loc2_ = map[_loc1_][xt][_loc3_];
+      var _loc2_ = map[_loc1_][xt][_loc3_];
       if(_loc2_ > 0)
       {
          if(_loc2_ == 1)
@@ -259,11 +254,10 @@ function tileTriggered(tile)
    invertPath = new Array();
    pathPos = new Array();
    var _loc1_ = path.length - 1;
-   var _loc3_;
    while(_loc1_ >= 0)
    {
       var newX = path[_loc1_][1];
-      _loc3_ = path[_loc1_][0];
+      var _loc3_ = path[_loc1_][0];
       posInfo = getTileInfo(newX,_loc3_);
       if(!(_loc1_ % 2))
       {
@@ -282,7 +276,6 @@ function testForInterupt(pathPos)
 {
    var _loc2_ = pathPos;
    var _loc1_ = 0;
-   var _loc3_;
    while(_loc1_ < interuptArray.length)
    {
       var k = 0;
@@ -298,7 +291,7 @@ function testForInterupt(pathPos)
                   var l = 0;
                   while(l < interuptArray[_loc1_].outT.length)
                   {
-                     _loc3_ = k;
+                     var _loc3_ = k;
                      while(_loc3_ < _loc2_.length)
                      {
                         if(interuptArray[_loc1_].outT[l][0] == _loc2_[_loc3_].ytile)
@@ -503,16 +496,14 @@ function moveChar(pathArray)
 function setObDepth()
 {
    var _loc2_ = 0;
-   var _loc1_;
-   var _loc3_;
    while(_loc2_ < obArray.length - 1)
    {
-      _loc1_ = _loc2_ + 1;
+      var _loc1_ = _loc2_ + 1;
       while(_loc1_ < obArray.length)
       {
          if(obArray[_loc2_].depth == obArray[_loc1_].depth)
          {
-            _loc3_ = false;
+            var _loc3_ = false;
             if(_loc2_ == 0)
             {
                if(obArray[_loc2_]._y + 10 > obArray[_loc1_]._y)
@@ -603,27 +594,50 @@ function removeObject(obj)
 }
 function registerWalkZone(zone)
 {
+   var _loc2_ = zone;
+   var _loc1_ = 0;
+   while(_loc1_ < walkZoneArray.length)
+   {
+      if(walkZoneArray[_loc1_] == _loc2_)
+      {
+         return;
+      }
+      _loc1_ = _loc1_ + 1;
+   }
    walkZoneArray.push(zone);
 }
 function unregisterWalkZone(zone)
 {
    var _loc2_ = zone;
-   for(var _loc1_ in walkZoneArray)
+   var _loc1_ = walkZoneArray.length - 1;
+   while(_loc1_ >= 0)
    {
       if(walkZoneArray[_loc1_] == _loc2_)
       {
          walkZoneArray.splice(_loc1_,1);
       }
+      _loc1_ = _loc1_ - 1;
    }
 }
 function registerDropZone(zone)
 {
+   var _loc2_ = zone;
+   var _loc1_ = 0;
+   while(_loc1_ < zoneArray.length)
+   {
+      if(zoneArray[_loc1_] == _loc2_)
+      {
+         return;
+      }
+      _loc1_ = _loc1_ + 1;
+   }
    zoneArray.push(zone);
 }
 function unregisterDropZone(zone)
 {
    var _loc2_ = zone;
-   for(var _loc1_ in zoneArray)
+   var _loc1_ = zoneArray.length - 1;
+   while(_loc1_ >= 0)
    {
       if(zoneArray[_loc1_] == _loc2_)
       {
@@ -696,7 +710,6 @@ function showInventory(pageNb)
          targetItem.onRelease = targetItem.onReleaseOutside = function()
          {
             var _loc1_ = this;
-            var _loc2_;
             if(itemWindow._currentframe < itemWindow._totalframes)
             {
                _loc1_.onPress = function()
@@ -717,7 +730,7 @@ function showInventory(pageNb)
             {
                _loc1_._visible = false;
                itemWindow.gotoAndStop(0);
-               _loc2_ = false;
+               var _loc2_ = false;
                for(var _loc3_ in zoneArray)
                {
                   if(zoneArray[_loc3_].hitTest(_xmouse,_ymouse,true))
@@ -778,8 +791,8 @@ findPath = function(map, startX, startY, endX, endY)
    {
       var minimum = 999999;
       var indexFound = 0;
-      var _loc2_;
-      var _loc3_;
+      var _loc2_ = undefined;
+      var _loc3_ = undefined;
       var _loc1_ = openList.length;
       while(_loc1_-- > 0)
       {
@@ -844,19 +857,16 @@ findPath = function(map, startX, startY, endX, endY)
    }
    var openList = new Array();
    openSquare(startY,startX,undefined,0);
-   var _loc2_;
-   var _loc1_;
-   var _loc3_;
    while(openList.length > 0 && !isClosed(endY,endX))
    {
       var i = nearerSquare();
       var nowY = openList[i][0];
       var nowX = openList[i][1];
       closeSquare(nowY,nowX);
-      _loc2_ = nowY - 1;
+      var _loc2_ = nowY - 1;
       while(_loc2_ < nowY + 2)
       {
-         _loc1_ = nowX - 1;
+         var _loc1_ = nowX - 1;
          while(_loc1_ < nowX + 2)
          {
             if(_loc2_ >= 0 && _loc2_ < mapH && _loc1_ >= 0 && _loc1_ < mapW && !(_loc2_ == nowY && _loc1_ == nowX) && (ALLOW_DIAGONAL || _loc2_ == nowY || _loc1_ == nowX) && (ALLOW_DIAGONAL_CORNERING || _loc2_ == nowY || _loc1_ == nowX || map[_loc2_][nowX] == 0 && !map[nowY][_loc1_]))
@@ -865,7 +875,7 @@ findPath = function(map, startX, startY, endX, endY)
                {
                   if(!isClosed(_loc2_,_loc1_))
                   {
-                     _loc3_ = mapStatus[nowY][nowX].movementCost + (!(_loc2_ == nowY || _loc1_ == nowX) ? D_COST : HV_COST) * !map[_loc2_][_loc1_];
+                     var _loc3_ = mapStatus[nowY][nowX].movementCost + (!(_loc2_ == nowY || _loc1_ == nowX) ? D_COST : HV_COST) * !map[_loc2_][_loc1_];
                      if(isOpen(_loc2_,_loc1_))
                      {
                         if(_loc3_ < mapStatus[_loc2_][_loc1_].movementCost)
