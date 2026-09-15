@@ -198,7 +198,7 @@
     flex-direction: column;
     align-items: center;
     gap: 18px;
-    width: min(92vw, 360px);
+    width: min(92vw, 420px);
     padding: 32px 36px;
     background: #111114;
     box-shadow: 0 0 0 1px #26262a, 0 20px 60px rgba(0, 0, 0, 0.6);
@@ -210,6 +210,36 @@
     font-size: 13px;
     color: #7a7d82;
     text-align: center;
+  }
+
+  /* Campaign artwork lives outside the SWF. It is a pre-launch preview only:
+     changing the selected image never changes the FlashVars or the Ruffle
+     player, so this remains safe to remove or expand independently. */
+  #mission-preview {
+    width: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: #0a0a0c;
+    border: 1px solid #34363e;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+  }
+
+  #mission-preview img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+
+  #mission-preview figcaption {
+    padding: 9px 12px 10px;
+    color: #e8e6df;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-align: left;
+    text-transform: uppercase;
   }
 
   .field-row {
@@ -349,6 +379,10 @@
 
 <div id="mission-screen">
   <p>Choose a mission to start from.</p>
+  <figure id="mission-preview">
+    <img id="mission-preview-image" src="assets/mission-01/to-enter-the-temple-card.png" width="640" height="480" alt="Mission artwork preview" />
+    <figcaption id="mission-preview-title">Mission 1 — To Enter the Temple</figcaption>
+  </figure>
   <div class="field-row">
     <label for="mission-select">Mission</label>
     <select id="mission-select"></select>
@@ -389,6 +423,8 @@
     const missionSelectEl = document.getElementById("mission-select");
     const cheatsCheckboxEl = document.getElementById("cheats-checkbox");
     const startButtonEl = document.getElementById("start-button");
+    const missionPreviewImageEl = document.getElementById("mission-preview-image");
+    const missionPreviewTitleEl = document.getElementById("mission-preview-title");
     const speedToggleButtonEl = document.getElementById("speed-toggle-button");
     const speedToggleNoteEl = document.getElementById("speed-toggle-note");
     const autoBattleToggleButtonEl = document.getElementById("autobattle-toggle-button");
@@ -437,6 +473,36 @@
       }
       missionSelectEl.appendChild(opt);
     }
+
+    // Keep new key art strictly presentation-only. These files are served by
+    // the launcher and never enter the original Flash/Ruffle module graph.
+    const MISSION_ART = {
+      "1":  { title: "Mission 1 — To Enter the Temple", src: "assets/mission-01/to-enter-the-temple-card.png", alt: "A Spider Rider approaches an ancient spider-marked temple with a rope." },
+      "2":  { title: "Mission 2 — The Oracle's Statue Chamber", src: "assets/mission-02/oracle-statue-chamber-card.png", alt: "A glowing oracle statue chamber and a floating battle card." },
+      "3":  { title: "Mission 3 — Find the Manacle", src: "assets/mission-03/find-the-manacle-card.png", alt: "A Spider Rider opens a luminous portal with an ancient manacle." },
+      "4":  { title: "Mission 4 — Find a Way Out of the Forest", src: "assets/mission-04/forest-exit-card.png", alt: "A rider and battle spider defend a forest village gate." },
+      "5":  { title: "Mission 5 — Bond with a Battle Spider", src: "assets/mission-05/bond-with-a-battle-spider-card.png", alt: "A Spider Rider forms a magical bond with a battle spider." },
+      "6":  { title: "Mission 6 — Free the Prisoners", src: "assets/mission-06/free-the-prisoners-card.png", alt: "A battle spider crosses a web bridge toward a cave prison rescue." },
+      "7":  { title: "Mission 7 — Save the Village", src: "assets/mission-07/save-the-village-card.png", alt: "A Spider Rider leads villagers across a bridge as a hostile web burns away." },
+      "8":  { title: "Mission 8 — Join Corona in Arachna", src: "assets/mission-08/town-of-arachna-card.png", alt: "Corona leads riders into the lantern-lit Town of Arachna." },
+      "9":  { title: "Mission 9 — Complete Spider Rider Training", src: "assets/mission-09/complete-spider-rider-training-card.png", alt: "Corona and the player face an honorable mounted training duel." },
+      "10": { title: "Mission 10 — Find the Spy", src: "assets/mission-10/find-the-spy-card.png", alt: "A rider investigates a rain-dark fortress corridor while a spy hides above." },
+      "11": { title: "Mission 11 — Win a Duel", src: "assets/mission-11/win-a-duel-card.png", alt: "Two Spider Riders ready for a formal duel in a stormy coliseum." },
+      "12": { title: "Mission 12 — Protect Arachna", src: "assets/mission-12/protect-arachna-card.png", alt: "Spider Riders defend Arachna's fortress gate against an Invectid siege." },
+      "13": { title: "Mission 13 — Defeat Grasshop", src: "assets/mission-13/defeat-grasshop-card.png", alt: "A Spider Rider faces Grasshop's colossal war beast in a ruined arena." },
+      "14": { title: "Mission 14 — Find Corona", src: "assets/mission-14/find-corona-rescue-card.png", alt: "A Spider Rider races through a luminous marsh to rescue Corona from a magical web trap." },
+      "15": { title: "Mission 15 — Find the Cards", src: "assets/mission-15/find-the-cards-card.png", alt: "Spider Riders celebrate in the restored town as collectible battle cards circle overhead." },
+      "16": { title: "Campaign Complete", src: "assets/mission-15/find-the-cards-card.png", alt: "Spider Riders celebrate in the restored town after the campaign." }
+    };
+
+    const updateMissionPreview = () => {
+      const art = MISSION_ART[missionSelectEl.value];
+      missionPreviewImageEl.src = art.src;
+      missionPreviewImageEl.alt = art.alt;
+      missionPreviewTitleEl.textContent = art.title;
+    };
+    missionSelectEl.addEventListener("change", updateMissionPreview);
+    updateMissionPreview();
 
     // Mission 16 isn't a real playable mission - it's the shell's own
     // "campaign complete" state (see frame_158's onClipEvent(load) in
