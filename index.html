@@ -367,14 +367,39 @@
   }
 
   #archive-link {
-    color: #8fd8ff;
-    font-size: 12px;
-    letter-spacing: 0.04em;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    width: min(410px, 100%);
+    margin: 16px auto 12px;
+    padding: 12px 15px;
+    border: 1px solid #4c8eb4;
+    border-radius: 5px;
+    background: linear-gradient(135deg, #123754, #101a33);
+    box-shadow: 0 0 18px rgba(69, 166, 224, 0.14);
+    color: #d6f3ff;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
     text-align: center;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+  }
+
+  #archive-link small {
+    color: #8fd8ff;
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    text-transform: none;
   }
 
   #archive-link:hover {
+    border-color: #c9f4ff;
+    background: linear-gradient(135deg, #1b5276, #142447);
     color: #ffffff;
+    transform: translateY(-2px);
   }
 </style>
 </head>
@@ -403,7 +428,10 @@
     <input id="cheats-checkbox" type="checkbox" />
   </div>
   <button id="start-button" type="button">Start Game</button>
-  <a id="archive-link" href="arachna-archives.html">Open Arachna Archives &amp; Fan Gallery</a>
+  <a id="archive-link" href="arachna-archives.html">
+    Arachna Archives
+    <small>Browse the 62-card forge, mission artwork, and local fan gallery &rarr;</small>
+  </a>
   <p id="bonus-note">
     Bonus Levels are unlocked in-game (Character Sheet &rarr; Bonus Levels)
     using these webcodes: Bonus 1 = <code>shadow</code>, Bonus 2 =
