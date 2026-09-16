@@ -157,7 +157,7 @@
 
     .battle-card {
       position: relative;
-      min-height: 265px;
+      min-height: 340px;
       padding: 7px;
       isolation: isolate;
       overflow: hidden;
@@ -180,13 +180,17 @@
     }
 
     .battle-card:hover { transform: perspective(500px) translateY(-7px) rotateX(0deg); box-shadow: 0 0 0 2px #071024, 0 22px 28px rgba(0, 0, 0, 0.5), 0 0 26px color-mix(in srgb, var(--card-accent) 38%, transparent); }
-    .battle-card.equipment { --card-accent: #69d9ff; }
+    .battle-card.weapon { --card-accent: #ffcb68; }
+    .battle-card.protection { --card-accent: #69d9ff; }
+    .battle-card.item { --card-accent: #e8ef7b; }
     .battle-card.boost { --card-accent: #ffad5d; }
     .battle-card.action { --card-accent: #c181ff; }
+    .battle-card.fusion { --card-accent: #ff74a7; }
+    .battle-card.system { --card-accent: #8cf6ff; }
     .battle-card__crown { padding: 6px 6px 4px; color: var(--card-accent); text-align: center; text-shadow: 0 0 11px color-mix(in srgb, var(--card-accent) 70%, transparent); }
     .card-category { font-size: 0.56rem; }
-    .battle-card__art { display: grid; place-items: center; min-height: 125px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--card-accent) 45%, transparent); background: radial-gradient(circle, color-mix(in srgb, var(--card-accent) 15%, #102144), #08101f 70%); }
-    .battle-card__art img { width: 104px; height: 131px; object-fit: contain; image-rendering: auto; filter: drop-shadow(0 5px 5px rgba(0, 0, 0, 0.55)); }
+    .battle-card__art { display: grid; place-items: center; aspect-ratio: 4 / 5; overflow: hidden; border: 1px solid color-mix(in srgb, var(--card-accent) 45%, transparent); background: radial-gradient(circle, color-mix(in srgb, var(--card-accent) 15%, #102144), #08101f 70%); }
+    .battle-card__art img { width: 100%; height: 100%; object-fit: cover; image-rendering: auto; filter: drop-shadow(0 5px 5px rgba(0, 0, 0, 0.55)); }
     .battle-card h3 { min-height: 2.45em; margin: 9px 7px 3px; color: #fff; font-size: 0.83rem; line-height: 1.2; text-align: center; }
     .battle-card__rule { height: 1px; margin: 7px 8px; background: linear-gradient(90deg, transparent, var(--card-accent), transparent); }
     .battle-card__flavor { min-height: 2.5em; margin: 0 8px; color: #b7c6e3; font-size: 0.63rem; line-height: 1.35; text-align: center; }
@@ -256,10 +260,9 @@
     </section>
 
     <section class="panel" id="cards-panel" data-panel="cards">
-      <div class="eyebrow">62-card slide deck · original card forge</div>
+      <div class="eyebrow">Original card forge</div>
       <h2>Card Forge</h2>
-      <p class="section-copy">Browse the original card illustrations below, or open the complete 62-card slide deck with expanded card records. The gallery design is non-destructive and never replaces the in-game card data.</p>
-      <a class="archive-action" href="downloads/Spider_Riders_Arachna_Card_Archive_62.pptx" download>Download the complete 62-card slide deck</a>
+      <p class="section-copy">All 62 cards now have a new, original illustration created for this standalone gallery. These showcase cards never replace the in-game data or alter the Flash game.</p>
       <div class="filter-row" id="card-filters"></div>
       <div class="card-grid" id="card-grid"></div>
     </section>
@@ -309,13 +312,25 @@
       ["Finale", "Campaign Complete", "Hunter and Corona celebrate with the five canonical Battle Spiders.", "assets/mission-16/missions-complete-core-five-splash.png"]
     ];
 
-    const cardGroups = [
-      { key: "equipment", label: "Equipment", folder: "Equipment", names: ["Arachna Needle", "Assault Shield", "Axial Pike", "Ballistic Mace", "Blue Manacle", "Boom Ball Bow", "Bug Blade", "Bug Zapper", "Elite Plate Armor", "Green Oracle Key", "Heart Shield", "Jousting Shield", "Light Impaler", "Melee Shield", "Oracle Spear", "Red Manacle", "Red Oracle Key", "Rider Scale", "Skirmish Shield", "Spider Lance", "Spy", "Stingslinger", "Swordshot", "The Kleaver", "Vanguard Shield"] },
-      { key: "boost", label: "Boost", folder: "Boost", names: ["Arachna Power", "Barbecue", "Boo!", "Bounce", "Deep Freeze", "Impact", "Intervention", "Poison Fang", "Starburst", "Super Size", "Surprise Attack", "Warrior Path"] },
-      { key: "action", label: "Battle Action", folder: "BattleAction", names: ["Blessing", "Boost Blaze", "Cutie Pie", "Disarm", "Evasion", "Fail", "False Order", "Gift From Oracle", "Invasion", "Light of the Oracle", "Lightning Bolt", "Luck", "Oracle's Fury", "Positive Attitude", "Rider Master", "Sanctuary", "Shadow", "Shield Master", "Sparkle Help", "Trap", "Weapon Master", "Web Trap", "Yellow Manacle"] }
+    const cardCategories = [
+      { key: "weapon", label: "Weapon" },
+      { key: "protection", label: "Protection" },
+      { key: "item", label: "Item" },
+      { key: "action", label: "Battle Action" },
+      { key: "boost", label: "Boost" },
+      { key: "fusion", label: "Fusion" },
+      { key: "system", label: "System" }
     ];
 
-    const cardData = cardGroups.flatMap(group => group.names.map(name => ({ ...group, name })));
+    const cardData = [
+      ["weapon", "Bug Blade", "100-bug-blade"], ["weapon", "Arachna Needle", "101-arachna-needle"], ["weapon", "Light Impaler", "102-light-impaler"], ["weapon", "Stingslinger", "103-stingslinger"], ["weapon", "Axial Pike", "104-axial-pike"], ["weapon", "Swordshot", "105-swordshot"], ["weapon", "The Kleaver", "106-the-kleaver"], ["weapon", "Ballistic Mace", "107-ballistic-mace"], ["weapon", "Boom Ball Bow", "108-boom-ball-bow"], ["weapon", "Spider Lance", "109-spider-lance"], ["weapon", "Oracle Spear", "110-oracle-spear"],
+      ["protection", "Heart Shield", "200-heart-shield"], ["protection", "Melee Shield", "201-melee-shield"], ["protection", "Vanguard Shield", "202-vanguard-shield"], ["protection", "Skirmish Shield", "203-skirmish-shield"], ["protection", "Jousting Shield", "204-jousting-shield"], ["protection", "Assault Shield", "205-assault-shield"], ["protection", "Rider Scale", "206-rider-scale"], ["protection", "Spider Armor", "207-spider-armor"], ["protection", "Elite Plate Armor", "208-elite-plate-armor"],
+      ["item", "Red Manacle", "300-red-manacle"], ["item", "Blue Manacle", "301-blue-manacle"], ["item", "Yellow Manacle", "302-yellow-manacle"], ["item", "Spy", "303-spy"], ["item", "Bug Zapper", "304-bug-zapper"],
+      ["action", "Fail", "400-fail"], ["action", "Evasion", "401-evasion"], ["action", "Trap", "402-trap"], ["action", "False Order", "403-false-order"], ["action", "Luck", "404-luck"], ["action", "Disarm", "405-disarm"], ["action", "Web Trap", "406-web-trap"], ["action", "Shadow", "407-shadow"], ["action", "Positive Attitude", "408-positive-attitude"], ["action", "Lightning Bolt", "409-lightning-bolt"], ["action", "Weapon Master", "410-weapon-master"], ["action", "Boost Blaze", "411-boost-blaze"], ["action", "Light of the Oracle", "412-light-of-the-oracle"], ["action", "Blessing", "413-blessing"], ["action", "Cutie Pie", "414-cutie-pie"], ["action", "Rider Master", "415-rider-master"], ["action", "Shield Master", "416-shield-master"], ["action", "Sparkle Help", "417-sparkle-help"], ["action", "Sanctuary", "418-sanctuary"], ["action", "Gift From Oracle", "419-gift-from-oracle"], ["action", "Oracle’s Fury", "420-oracles-fury"], ["action", "Invasion", "421-invasion"],
+      ["boost", "Bounce", "500-bounce"], ["boost", "Impact", "501-impact"], ["boost", "Boo!", "502-boo"], ["boost", "Surprise Attack", "503-surprise-attack"], ["boost", "Starburst", "504-starburst"], ["boost", "Deep Freeze", "505-deep-freeze"], ["boost", "Super Size", "506-super-size"], ["boost", "Poison Fang", "507-poison-fang"], ["boost", "Barbecue", "508-barbecue"], ["boost", "Intervention", "509-intervention"], ["boost", "Warrior Path", "510-warrior-path"], ["boost", "Arachna Power", "511-arachna-power"],
+      ["fusion", "Red Oracle Key", "600-red-oracle-key"], ["fusion", "Green Oracle Key", "601-green-oracle-key"],
+      ["system", "Dice Modifier", "sys-dice-modifier"]
+    ].map(([key, name, asset]) => ({ ...cardCategories.find(category => category.key === key), name, asset }));
     const missionGrid = document.getElementById("mission-grid");
     const cardGrid = document.getElementById("card-grid");
     const fanGrid = document.getElementById("fan-grid");
@@ -325,10 +340,6 @@
 
     function escapeHtml(value) {
       return value.replace(/[&<>'"]/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", "\"": "&quot;" })[character]);
-    }
-
-    function imagePath(folder, name) {
-      return "assets/card-illustrations/" + folder + "/" + encodeURIComponent(name) + ".png";
     }
 
     function renderMissions() {
@@ -352,7 +363,7 @@
     }
 
     function renderCardFilters() {
-      const filters = [{ key: "all", label: "All cards" }, ...cardGroups.map(({ key, label }) => ({ key, label }))];
+      const filters = [{ key: "all", label: "All 62 cards" }, ...cardCategories];
       cardFilters.replaceChildren(...filters.map(filter => {
         const button = document.createElement("button");
         button.type = "button";
@@ -368,7 +379,7 @@
       cardGrid.replaceChildren(...visibleCards.map((card, index) => {
         const cardEl = document.createElement("article");
         cardEl.className = "battle-card " + card.key;
-        cardEl.innerHTML = "<div class=\"battle-card__crown\"><span class=\"card-category\">" + card.label + "</span></div><div class=\"battle-card__art\"><img loading=\"lazy\" alt=\"" + card.name + " illustration\" src=\"" + imagePath(card.folder, card.name) + "\"></div><h3>" + card.name + "</h3><div class=\"battle-card__rule\"></div><p class=\"battle-card__flavor\">A Flash-era collector frame for the original game illustration.</p><div class=\"card-footer\"><span>Arachna archive</span><span>" + String(index + 1).padStart(2, "0") + "</span></div>";
+        cardEl.innerHTML = "<div class=\"battle-card__crown\"><span class=\"card-category\">" + card.label + "</span></div><div class=\"battle-card__art\"><img loading=\"lazy\" alt=\"Original " + card.name + " card illustration\" src=\"assets/original-card-art/" + card.asset + ".png\"></div><h3>" + card.name + "</h3><div class=\"battle-card__rule\"></div><p class=\"battle-card__flavor\">Original art for the standalone Arachna Archives showcase.</p><div class=\"card-footer\"><span>Arachna archive</span><span>" + String(index + 1).padStart(2, "0") + "</span></div>";
         return cardEl;
       }));
     }
