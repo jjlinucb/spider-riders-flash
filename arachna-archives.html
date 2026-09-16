@@ -78,7 +78,7 @@
 
     h2 { margin-bottom: 8px; font-size: clamp(1.4rem, 3vw, 2rem); }
 
-    .back-link, .tab, .filter, .submit-button {
+    .back-link, .archive-action, .tab, .filter, .submit-button {
       border: 1px solid var(--line);
       background: rgba(8, 19, 48, 0.74);
       color: var(--text);
@@ -88,8 +88,9 @@
       transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
     }
 
-    .back-link { padding: 10px 14px; font-size: 0.8rem; white-space: nowrap; }
-    .back-link:hover, .tab:hover, .filter:hover, .submit-button:hover { border-color: var(--aqua); background: rgba(26, 76, 132, 0.86); transform: translateY(-1px); }
+    .back-link, .archive-action { padding: 10px 14px; font-size: 0.8rem; white-space: nowrap; }
+    .archive-action { display: inline-block; margin: 0 0 24px; border-color: rgba(255, 214, 111, 0.7); color: var(--gold); font-weight: 700; letter-spacing: 0.04em; }
+    .back-link:hover, .archive-action:hover, .tab:hover, .filter:hover, .submit-button:hover { border-color: var(--aqua); background: rgba(26, 76, 132, 0.86); transform: translateY(-1px); }
 
     .intro {
       display: grid;
@@ -248,16 +249,17 @@
     </nav>
 
     <section class="panel active" id="campaign-panel" data-panel="campaign">
-      <div class="eyebrow">15 mission cards</div>
+      <div class="eyebrow">15 missions · finale splash</div>
       <h2>The Hunter → Shadow → Arachna arc</h2>
-      <p class="section-copy">Each mission uses a presentation card outside the SWF. The first forest run now follows Hunter from the Oracle’s chamber through his bond with Shadow and into the village rescue; later cards continue through the Arachna, Invectid, and Corona arcs.</p>
+      <p class="section-copy">Each mission uses a presentation card outside the SWF. The first forest run follows Hunter from the Oracle’s chamber through his bond with Shadow and into the village rescue; later cards continue through the Arachna, Invectid, and Corona arcs, then finish on a separate campaign-complete splash.</p>
       <div class="mission-grid" id="mission-grid"></div>
     </section>
 
     <section class="panel" id="cards-panel" data-panel="cards">
-      <div class="eyebrow">60 original game cards · redesigned frames</div>
+      <div class="eyebrow">62-card slide deck · original card forge</div>
       <h2>Card Forge</h2>
-      <p class="section-copy">This is a non-destructive visual reframe for the game’s existing card illustrations: every card has a clearer category color, title hierarchy, art window, and collectible-style treatment. It is a gallery design, not a replacement of the in-game card data.</p>
+      <p class="section-copy">Browse the original card illustrations below, or open the complete 62-card slide deck with expanded card records. The gallery design is non-destructive and never replaces the in-game card data.</p>
+      <a class="archive-action" href="downloads/Spider_Riders_Arachna_Card_Archive_62.pptx" download>Download the complete 62-card slide deck</a>
       <div class="filter-row" id="card-filters"></div>
       <div class="card-grid" id="card-grid"></div>
     </section>
@@ -287,22 +289,24 @@
   </main>
 
   <script>
+    const ART_REVISION = "20260915-spider-roster-v2";
     const missions = [
       [1, "To Enter the Temple", "Hunter finds the gateway to the Inner World.", "assets/mission-01/to-enter-the-temple-hunter-card.png"],
       [2, "Oracle's Statue Chamber", "The Oracle’s scattered spirit calls Hunter onward.", "assets/mission-02/oracle-statue-chamber-hunter-card.png"],
       [3, "Find the Manacle", "A Manacle opens Hunter’s path toward Arachna.", "assets/mission-03/find-the-manacle-hunter-card.png"],
       [4, "Way Out of the Forest", "Hunter crosses an Invectid-shadowed forest route.", "assets/mission-04/forest-exit-hunter-card.png"],
-      [5, "Bond with a Battle Spider", "Hunter earns Shadow’s trust in the moonlit woods.", "assets/mission-05/bond-with-shadow-hunter-card.png"],
-      [6, "Free the Prisoners", "Hunter and Shadow make a web bridge to safety.", "assets/mission-06/free-prisoners-hunter-shadow-card.png"],
-      [7, "Save the Village", "The rescue culminates in a burning web blockade.", "assets/mission-07/save-village-hunter-shadow-card.png"],
-      [8, "Join Corona in Arachna", "Corona leads the way into lantern-lit Arachna.", "assets/mission-08/town-of-arachna-card.png"],
+      [5, "Bond with a Battle Spider", "Hunter forms his first Manacle bond with Shadow.", "assets/mission-05/bond-with-shadow-hunter-reference-card.png"],
+      [6, "Free the Prisoners", "Hunter and Shadow guide villagers across a rescue web bridge.", "assets/mission-06/free-prisoners-hunter-shadow-reference-card.png"],
+      [7, "Save the Village", "Hunter and Shadow break the Invectid web blockade.", "assets/mission-07/save-village-hunter-shadow-reference-card.png"],
+      [8, "Join Corona in Arachna", "Hunter and Corona arrive with Shadow and Venus.", "assets/mission-08/town-of-arachna-hunter-corona-spiders-card.png"],
       [9, "Spider Rider Training", "Hunter takes on a formal Arachna training duel.", "assets/mission-09/complete-spider-rider-training-hunter-igneous-card.png"],
-      [10, "Find the Spy", "A fortress investigation exposes an Invectid plot.", "assets/mission-10/find-the-spy-card.png"],
-      [11, "Win a Duel", "The coliseum challenge proves a Rider’s skill.", "assets/mission-11/win-a-duel-card.png"],
+      [10, "Find the Spy", "Hunter and Corona expose an Invectid plot.", "assets/mission-10/find-the-spy-hunter-corona-card.png"],
+      [11, "Win a Duel", "Hunter and Shadow face Igneous and Flame.", "assets/mission-11/win-a-duel-hunter-igneous-spiders-card.png"],
       [12, "Protect Arachna", "Hunter and Igneous face Buguese’s siege.", "assets/mission-12/protect-arachna-buguese-card.png"],
-      [13, "Defeat Grasshop", "Hunter and Shadow face Grasshop and his monster.", "assets/mission-13/defeat-grasshop-hunter-card.png"],
+      [13, "Defeat Grasshop", "Hunter and Shadow face Grasshop's Invectid war machine.", "assets/mission-13/defeat-grasshop-hunter-shadow-reference-card.png"],
       [14, "Find Corona", "Hunter races through the marsh to bring Corona home.", "assets/mission-14/find-corona-rescue-hunter-card.png"],
-      [15, "Find the Cards", "The Riders gather for Arachna’s restored future.", "assets/mission-15/find-the-cards-cast-card.png"]
+      [15, "Find the Cards", "The Riders gather for Arachna’s restored future.", "assets/mission-15/find-the-cards-cast-card.png"],
+      ["Finale", "Campaign Complete", "Hunter and Corona celebrate with the five canonical Battle Spiders.", "assets/mission-16/missions-complete-core-five-splash.png"]
     ];
 
     const cardGroups = [
@@ -333,15 +337,15 @@
         card.className = "mission-card";
         const image = document.createElement("img");
         image.loading = "lazy";
-        image.src = src;
-        image.alt = "Mission " + number + ": " + title;
+        image.src = src + "?v=" + ART_REVISION;
+        image.alt = (number === "Finale" ? "Campaign finale" : "Mission " + number) + ": " + title;
         const error = document.createElement("div");
         error.className = "image-error";
         error.textContent = "Artwork file not found — check the local assets folder.";
         image.addEventListener("error", () => { error.style.display = "block"; });
         const body = document.createElement("div");
         body.className = "mission-card__body";
-        body.innerHTML = "<div class=\"mission-number\">Mission " + number + "</div><h3>" + title + "</h3><p>" + copy + "</p>";
+        body.innerHTML = "<div class=\"mission-number\">" + (number === "Finale" ? "Finale splash" : "Mission " + number) + "</div><h3>" + title + "</h3><p>" + copy + "</p>";
         card.append(image, error, body);
         return card;
       }));

@@ -488,28 +488,29 @@
 
     // Keep new key art strictly presentation-only. These files are served by
     // the launcher and never enter the original Flash/Ruffle module graph.
+    const ART_REVISION = "20260915-spider-roster-v2";
     const MISSION_ART = {
       "1":  { title: "Mission 1 — To Enter the Temple", src: "assets/mission-01/to-enter-the-temple-hunter-card.png", alt: "Hunter Steele approaches an ancient spider-marked temple." },
       "2":  { title: "Mission 2 — The Oracle's Statue Chamber", src: "assets/mission-02/oracle-statue-chamber-hunter-card.png", alt: "Hunter discovers the Oracle's statue chamber and a glowing battle card." },
       "3":  { title: "Mission 3 — Find the Manacle", src: "assets/mission-03/find-the-manacle-hunter-card.png", alt: "Hunter raises the Manacle before a portal into the Inner World." },
       "4":  { title: "Mission 4 — Find a Way Out of the Forest", src: "assets/mission-04/forest-exit-hunter-card.png", alt: "Hunter navigates the Invectid-infested Forest of Bewilderment." },
-      "5":  { title: "Mission 5 — Bond with a Battle Spider", src: "assets/mission-05/bond-with-shadow-hunter-card.png", alt: "Hunter and Shadow form their first bond in the moonlit forest." },
-      "6":  { title: "Mission 6 — Free the Prisoners", src: "assets/mission-06/free-prisoners-hunter-shadow-card.png", alt: "Hunter and Shadow lead prisoners across a rescue web bridge." },
-      "7":  { title: "Mission 7 — Save the Village", src: "assets/mission-07/save-village-hunter-shadow-card.png", alt: "Hunter and Shadow break the Invectid web barrier to save the village." },
-      "8":  { title: "Mission 8 — Join Corona in Arachna", src: "assets/mission-08/town-of-arachna-card.png", alt: "Corona leads riders into the lantern-lit Town of Arachna." },
+      "5":  { title: "Mission 5 — Bond with a Battle Spider", src: "assets/mission-05/bond-with-shadow-hunter-reference-card.png", alt: "Hunter forms his first Manacle bond with Shadow in the moonlit forest." },
+      "6":  { title: "Mission 6 — Free the Prisoners", src: "assets/mission-06/free-prisoners-hunter-shadow-reference-card.png", alt: "Hunter and Shadow lead prisoners safely across a rescue web bridge." },
+      "7":  { title: "Mission 7 — Save the Village", src: "assets/mission-07/save-village-hunter-shadow-reference-card.png", alt: "Hunter and Shadow break the Invectid web barrier to save the village." },
+      "8":  { title: "Mission 8 — Join Corona in Arachna", src: "assets/mission-08/town-of-arachna-hunter-corona-spiders-card.png", alt: "Hunter and Corona arrive in Arachna with Shadow and Venus." },
       "9":  { title: "Mission 9 — Complete Spider Rider Training", src: "assets/mission-09/complete-spider-rider-training-hunter-igneous-card.png", alt: "Hunter Steele trains with Igneous in the Arachna arena." },
-      "10": { title: "Mission 10 — Find the Spy", src: "assets/mission-10/find-the-spy-card.png", alt: "A rider investigates a rain-dark fortress corridor while a spy hides above." },
-      "11": { title: "Mission 11 — Win a Duel", src: "assets/mission-11/win-a-duel-card.png", alt: "Two Spider Riders ready for a formal duel in a stormy coliseum." },
+      "10": { title: "Mission 10 — Find the Spy", src: "assets/mission-10/find-the-spy-hunter-corona-card.png", alt: "Hunter and Corona uncover an Invectid spy in Arachna's moonlit fortress." },
+      "11": { title: "Mission 11 — Win a Duel", src: "assets/mission-11/win-a-duel-hunter-igneous-spiders-card.png", alt: "Hunter and Shadow face Igneous and Flame in Arachna's coliseum." },
       "12": { title: "Mission 12 — Protect Arachna", src: "assets/mission-12/protect-arachna-buguese-card.png", alt: "Hunter and Igneous defend Arachna's fortress gate from Buguese and an Invectid siege." },
-      "13": { title: "Mission 13 — Defeat Grasshop", src: "assets/mission-13/defeat-grasshop-hunter-card.png", alt: "Hunter Steele and Shadow face Grasshop and his colossal war beast in a ruined arena." },
+      "13": { title: "Mission 13 — Defeat Grasshop", src: "assets/mission-13/defeat-grasshop-hunter-shadow-reference-card.png", alt: "Hunter and Shadow face Grasshop and his Invectid war machine in a ruined arena." },
       "14": { title: "Mission 14 — Find Corona", src: "assets/mission-14/find-corona-rescue-hunter-card.png", alt: "Hunter Steele races through a luminous marsh to rescue Corona from a magical web trap." },
       "15": { title: "Mission 15 — Find the Cards", src: "assets/mission-15/find-the-cards-cast-card.png", alt: "Hunter, Corona, Igneous, Magma, Aqune, and Prince Lumen celebrate in the restored town as battle cards circle overhead." },
-      "16": { title: "Campaign Complete", src: "assets/mission-15/find-the-cards-cast-card.png", alt: "Hunter, Corona, Igneous, Magma, Aqune, and Prince Lumen celebrate after the campaign." }
+      "16": { title: "Campaign Complete", src: "assets/mission-16/missions-complete-core-five-splash.png", alt: "Hunter and Corona celebrate with Shadow, Flame, Venus, Hortala, and Brutus after the campaign." }
     };
 
     const updateMissionPreview = () => {
       const art = MISSION_ART[missionSelectEl.value];
-      missionPreviewImageEl.src = art.src;
+      missionPreviewImageEl.src = art.src + "?v=" + ART_REVISION;
       missionPreviewImageEl.alt = art.alt;
       missionPreviewTitleEl.textContent = art.title;
     };
