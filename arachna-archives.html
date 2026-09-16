@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Arachna Archives — Spider Riders Fan Gallery</title>
+  <style>
+    :root {
+      --ink: #080d1c;
+      --panel: rgba(10, 20, 48, 0.92);
+      --line: rgba(132, 218, 255, 0.34);
+      --aqua: #75eaff;
+      --blue: #4575ff;
+      --violet: #a56dff;
+      --gold: #ffd66f;
+      --text: #f4f7ff;
+      --muted: #9ab0d1;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-width: 320px;
+      margin: 0;
+      color: var(--text);
+      font-family: "Trebuchet MS", Verdana, sans-serif;
+      background:
+        radial-gradient(circle at 18% 0%, rgba(44, 104, 229, 0.36), transparent 32rem),
+        radial-gradient(circle at 92% 20%, rgba(143, 69, 207, 0.26), transparent 28rem),
+        linear-gradient(145deg, #060a16 0%, #0c1635 48%, #080a18 100%);
+    }
+
+    body::before {
+      position: fixed;
+      z-index: -1;
+      inset: 0;
+      content: "";
+      pointer-events: none;
+      opacity: 0.34;
+      background-image:
+        linear-gradient(rgba(122, 223, 255, 0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(122, 223, 255, 0.045) 1px, transparent 1px);
+      background-size: 24px 24px;
+      mask-image: linear-gradient(#000, transparent 82%);
+    }
+
+    a { color: inherit; }
+
+    .shell { width: min(1220px, calc(100% - 32px)); margin: 0 auto; }
+
+    .masthead {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 28px 0 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand-kicker, .eyebrow, .mission-number, .card-category, .card-footer, .fan-meta {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .brand-kicker, .eyebrow { color: var(--aqua); }
+
+    h1, h2, h3, p { margin-top: 0; }
+
+    h1 {
+      margin: 4px 0 0;
+      font-size: clamp(1.55rem, 4vw, 2.7rem);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      text-shadow: 0 0 24px rgba(117, 234, 255, 0.42);
+    }
+
+    h2 { margin-bottom: 8px; font-size: clamp(1.4rem, 3vw, 2rem); }
+
+    .back-link, .tab, .filter, .submit-button {
+      border: 1px solid var(--line);
+      background: rgba(8, 19, 48, 0.74);
+      color: var(--text);
+      text-decoration: none;
+      font: inherit;
+      cursor: pointer;
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+    }
+
+    .back-link { padding: 10px 14px; font-size: 0.8rem; white-space: nowrap; }
+    .back-link:hover, .tab:hover, .filter:hover, .submit-button:hover { border-color: var(--aqua); background: rgba(26, 76, 132, 0.86); transform: translateY(-1px); }
+
+    .intro {
+      display: grid;
+      grid-template-columns: minmax(0, 1.7fr) minmax(220px, 0.7fr);
+      gap: 26px;
+      padding: 40px 0 24px;
+    }
+
+    .intro p { max-width: 52rem; margin-bottom: 0; color: var(--muted); line-height: 1.65; }
+
+    .signal-box {
+      align-self: start;
+      padding: 16px;
+      border: 1px solid rgba(255, 214, 111, 0.5);
+      background: linear-gradient(145deg, rgba(97, 63, 22, 0.6), rgba(27, 33, 62, 0.72));
+      box-shadow: inset 0 0 28px rgba(255, 214, 111, 0.08);
+    }
+
+    .signal-box strong { display: block; margin-bottom: 6px; color: var(--gold); text-transform: uppercase; letter-spacing: 0.08em; }
+    .signal-box span { color: #e3d9be; font-size: 0.84rem; line-height: 1.45; }
+
+    .tabs { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px; border: 1px solid var(--line); background: rgba(3, 8, 24, 0.6); }
+    .tab { padding: 10px 14px; font-size: 0.8rem; }
+    .tab.active { border-color: var(--aqua); color: var(--aqua); background: rgba(21, 95, 152, 0.65); box-shadow: 0 0 18px rgba(117, 234, 255, 0.14); }
+
+    .panel { display: none; padding: 34px 0 64px; }
+    .panel.active { display: block; }
+
+    .section-copy { max-width: 48rem; margin-bottom: 24px; color: var(--muted); line-height: 1.6; }
+
+    .mission-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
+      gap: 18px;
+    }
+
+    .mission-card {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(117, 234, 255, 0.32);
+      background: #0a1129;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+      transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+    }
+
+    .mission-card:hover { transform: translateY(-5px); border-color: var(--aqua); box-shadow: 0 18px 36px rgba(0, 0, 0, 0.45), 0 0 20px rgba(117, 234, 255, 0.15); }
+    .mission-card img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: #10172b; }
+    .mission-card__body { min-height: 96px; padding: 12px 13px 14px; background: linear-gradient(135deg, #111b3e, #0b1024); }
+    .mission-number { color: var(--gold); }
+    .mission-card h3 { margin: 5px 0 0; font-size: 0.96rem; line-height: 1.25; }
+    .mission-card p { margin: 7px 0 0; color: var(--muted); font-size: 0.76rem; line-height: 1.4; }
+    .image-error { display: none; padding: 9px 12px; color: #ffc0bc; background: #3b1422; font-size: 0.76rem; }
+
+    .filter-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0; }
+    .filter { padding: 8px 11px; font-size: 0.74rem; }
+    .filter.active { border-color: var(--gold); color: var(--gold); }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
+      gap: 18px;
+      align-items: start;
+    }
+
+    .battle-card {
+      position: relative;
+      min-height: 265px;
+      padding: 7px;
+      isolation: isolate;
+      overflow: hidden;
+      border: 2px solid var(--card-accent);
+      border-radius: 8px 8px 15px 15px;
+      background: linear-gradient(145deg, #1c294b, #081020 68%);
+      box-shadow: 0 0 0 2px #071024, 0 14px 18px rgba(0, 0, 0, 0.38), inset 0 0 18px color-mix(in srgb, var(--card-accent) 24%, transparent);
+      transform: perspective(500px) rotateX(1deg);
+      transition: transform 160ms ease, box-shadow 160ms ease;
+    }
+
+    .battle-card::before {
+      position: absolute;
+      z-index: -1;
+      inset: 3px;
+      content: "";
+      border: 1px solid color-mix(in srgb, var(--card-accent) 70%, #fff 30%);
+      border-radius: 5px 5px 12px 12px;
+      opacity: 0.8;
+    }
+
+    .battle-card:hover { transform: perspective(500px) translateY(-7px) rotateX(0deg); box-shadow: 0 0 0 2px #071024, 0 22px 28px rgba(0, 0, 0, 0.5), 0 0 26px color-mix(in srgb, var(--card-accent) 38%, transparent); }
+    .battle-card.equipment { --card-accent: #69d9ff; }
+    .battle-card.boost { --card-accent: #ffad5d; }
+    .battle-card.action { --card-accent: #c181ff; }
+    .battle-card__crown { padding: 6px 6px 4px; color: var(--card-accent); text-align: center; text-shadow: 0 0 11px color-mix(in srgb, var(--card-accent) 70%, transparent); }
+    .card-category { font-size: 0.56rem; }
+    .battle-card__art { display: grid; place-items: center; min-height: 125px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--card-accent) 45%, transparent); background: radial-gradient(circle, color-mix(in srgb, var(--card-accent) 15%, #102144), #08101f 70%); }
+    .battle-card__art img { width: 104px; height: 131px; object-fit: contain; image-rendering: auto; filter: drop-shadow(0 5px 5px rgba(0, 0, 0, 0.55)); }
+    .battle-card h3 { min-height: 2.45em; margin: 9px 7px 3px; color: #fff; font-size: 0.83rem; line-height: 1.2; text-align: center; }
+    .battle-card__rule { height: 1px; margin: 7px 8px; background: linear-gradient(90deg, transparent, var(--card-accent), transparent); }
+    .battle-card__flavor { min-height: 2.5em; margin: 0 8px; color: #b7c6e3; font-size: 0.63rem; line-height: 1.35; text-align: center; }
+    .card-footer { display: flex; justify-content: space-between; margin: 9px 8px 2px; color: var(--card-accent); font-size: 0.52rem; }
+
+    .fan-layout { display: grid; grid-template-columns: minmax(245px, 0.72fr) minmax(0, 1.7fr); gap: 24px; }
+    .fan-form, .fan-note { border: 1px solid var(--line); background: var(--panel); box-shadow: 0 18px 42px rgba(0, 0, 0, 0.25); }
+    .fan-form { padding: 20px; }
+    .fan-form h3, .fan-note h3 { margin-bottom: 8px; }
+    .fan-form p, .fan-note p { color: var(--muted); font-size: 0.82rem; line-height: 1.5; }
+    label { display: block; margin: 15px 0 6px; color: #cbd9f2; font-size: 0.78rem; }
+    input { width: 100%; border: 1px solid #405a88; background: #071024; color: var(--text); padding: 9px; font: inherit; }
+    input[type="file"] { padding: 7px; font-size: 0.74rem; }
+    .submit-button { width: 100%; margin-top: 18px; padding: 11px; border-color: var(--gold); color: var(--gold); font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+    .fan-note { display: none; margin-bottom: 18px; padding: 15px 17px; border-color: rgba(255, 214, 111, 0.5); }
+    .fan-note.visible { display: block; }
+    .fan-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 18px; }
+    .fan-empty { grid-column: 1 / -1; padding: 34px; border: 1px dashed rgba(117, 234, 255, 0.42); color: var(--muted); text-align: center; }
+    .fan-piece { overflow: hidden; border: 1px solid var(--line); background: #071024; }
+    .fan-piece img { display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: cover; background: #10172b; }
+    .fan-piece__info { padding: 11px; }
+    .fan-piece__info h3 { margin: 0 0 4px; font-size: 0.9rem; }
+    .fan-meta { color: var(--aqua); font-size: 0.58rem; }
+
+    @media (max-width: 720px) {
+      .masthead, .intro, .fan-layout { grid-template-columns: 1fr; }
+      .masthead { align-items: flex-start; flex-direction: column; }
+      .intro { display: grid; }
+      .card-grid { grid-template-columns: repeat(auto-fill, minmax(138px, 1fr)); gap: 14px; }
+      .mission-grid { grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 13px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="masthead">
+      <div>
+        <div class="brand-kicker">Unofficial fan collection · non-game companion</div>
+        <h1>Arachna Archives</h1>
+      </div>
+      <a class="back-link" href="index.html">← Back to game launcher</a>
+    </header>
+
+    <section class="intro">
+      <div>
+        <div class="eyebrow">Campaign gallery · card forge · fan wall</div>
+        <h2>A home for the art around Battle for Arachna.</h2>
+        <p>Explore the mission arc as a connected visual campaign, browse every available card illustration in a new Flash-era frame system, or stage a fan-art contribution locally. Nothing here loads into or changes the original game.</p>
+      </div>
+      <aside class="signal-box">
+        <strong>Fan wall prototype</strong>
+        <span>Uploads are previewed only in this browser session. A public gallery later needs a hosted upload service and moderation.</span>
+      </aside>
+    </section>
+
+    <nav class="tabs" aria-label="Arachna Archives sections">
+      <button class="tab active" type="button" data-tab="campaign">Mission Gallery</button>
+      <button class="tab" type="button" data-tab="cards">Card Forge</button>
+      <button class="tab" type="button" data-tab="fan">Fan Wall</button>
+    </nav>
+
+    <section class="panel active" id="campaign-panel" data-panel="campaign">
+      <div class="eyebrow">15 mission cards</div>
+      <h2>The Hunter → Shadow → Arachna arc</h2>
+      <p class="section-copy">Each mission uses a presentation card outside the SWF. The first forest run now follows Hunter from the Oracle’s chamber through his bond with Shadow and into the village rescue; later cards continue through the Arachna, Invectid, and Corona arcs.</p>
+      <div class="mission-grid" id="mission-grid"></div>
+    </section>
+
+    <section class="panel" id="cards-panel" data-panel="cards">
+      <div class="eyebrow">60 original game cards · redesigned frames</div>
+      <h2>Card Forge</h2>
+      <p class="section-copy">This is a non-destructive visual reframe for the game’s existing card illustrations: every card has a clearer category color, title hierarchy, art window, and collectible-style treatment. It is a gallery design, not a replacement of the in-game card data.</p>
+      <div class="filter-row" id="card-filters"></div>
+      <div class="card-grid" id="card-grid"></div>
+    </section>
+
+    <section class="panel" id="fan-panel" data-panel="fan">
+      <div class="eyebrow">Local contribution preview</div>
+      <h2>Fan Wall</h2>
+      <p class="section-copy">Drop an image, give it a title, and see how it sits in the gallery. This starter version deliberately keeps uploads on your device; it needs a hosted, moderated backend before public submissions should be opened.</p>
+      <div class="fan-layout">
+        <form class="fan-form" id="fan-form">
+          <h3>Add a local preview</h3>
+          <p>Your file stays in this tab. JPG, PNG, WebP, and GIF work best.</p>
+          <label for="fan-image">Artwork</label>
+          <input id="fan-image" type="file" accept="image/png,image/jpeg,image/webp,image/gif" required />
+          <label for="fan-title">Title</label>
+          <input id="fan-title" type="text" maxlength="60" placeholder="e.g. Shadow at Moonfall" required />
+          <label for="fan-artist">Artist name</label>
+          <input id="fan-artist" type="text" maxlength="60" placeholder="e.g. Your name" required />
+          <button class="submit-button" type="submit">Add to my wall</button>
+        </form>
+        <div>
+          <aside class="fan-note" id="fan-note"><h3>Preview added</h3><p>Your artwork is visible below for this browser session. It has not been uploaded anywhere.</p></aside>
+          <div class="fan-grid" id="fan-grid"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const missions = [
+      [1, "To Enter the Temple", "Hunter finds the gateway to the Inner World.", "assets/mission-01/to-enter-the-temple-hunter-card.png"],
+      [2, "Oracle's Statue Chamber", "The Oracle’s scattered spirit calls Hunter onward.", "assets/mission-02/oracle-statue-chamber-hunter-card.png"],
+      [3, "Find the Manacle", "A Manacle opens Hunter’s path toward Arachna.", "assets/mission-03/find-the-manacle-hunter-card.png"],
+      [4, "Way Out of the Forest", "Hunter crosses an Invectid-shadowed forest route.", "assets/mission-04/forest-exit-hunter-card.png"],
+      [5, "Bond with a Battle Spider", "Hunter earns Shadow’s trust in the moonlit woods.", "assets/mission-05/bond-with-shadow-hunter-card.png"],
+      [6, "Free the Prisoners", "Hunter and Shadow make a web bridge to safety.", "assets/mission-06/free-prisoners-hunter-shadow-card.png"],
+      [7, "Save the Village", "The rescue culminates in a burning web blockade.", "assets/mission-07/save-village-hunter-shadow-card.png"],
+      [8, "Join Corona in Arachna", "Corona leads the way into lantern-lit Arachna.", "assets/mission-08/town-of-arachna-card.png"],
+      [9, "Spider Rider Training", "Hunter takes on a formal Arachna training duel.", "assets/mission-09/complete-spider-rider-training-hunter-igneous-card.png"],
+      [10, "Find the Spy", "A fortress investigation exposes an Invectid plot.", "assets/mission-10/find-the-spy-card.png"],
+      [11, "Win a Duel", "The coliseum challenge proves a Rider’s skill.", "assets/mission-11/win-a-duel-card.png"],
+      [12, "Protect Arachna", "Hunter and Igneous face Buguese’s siege.", "assets/mission-12/protect-arachna-buguese-card.png"],
+      [13, "Defeat Grasshop", "Hunter and Shadow face Grasshop and his monster.", "assets/mission-13/defeat-grasshop-hunter-card.png"],
+      [14, "Find Corona", "Hunter races through the marsh to bring Corona home.", "assets/mission-14/find-corona-rescue-hunter-card.png"],
+      [15, "Find the Cards", "The Riders gather for Arachna’s restored future.", "assets/mission-15/find-the-cards-cast-card.png"]
+    ];
+
+    const cardGroups = [
+      { key: "equipment", label: "Equipment", folder: "Equipment", names: ["Arachna Needle", "Assault Shield", "Axial Pike", "Ballistic Mace", "Blue Manacle", "Boom Ball Bow", "Bug Blade", "Bug Zapper", "Elite Plate Armor", "Green Oracle Key", "Heart Shield", "Jousting Shield", "Light Impaler", "Melee Shield", "Oracle Spear", "Red Manacle", "Red Oracle Key", "Rider Scale", "Skirmish Shield", "Spider Lance", "Spy", "Stingslinger", "Swordshot", "The Kleaver", "Vanguard Shield"] },
+      { key: "boost", label: "Boost", folder: "Boost", names: ["Arachna Power", "Barbecue", "Boo!", "Bounce", "Deep Freeze", "Impact", "Intervention", "Poison Fang", "Starburst", "Super Size", "Surprise Attack", "Warrior Path"] },
+      { key: "action", label: "Battle Action", folder: "BattleAction", names: ["Blessing", "Boost Blaze", "Cutie Pie", "Disarm", "Evasion", "Fail", "False Order", "Gift From Oracle", "Invasion", "Light of the Oracle", "Lightning Bolt", "Luck", "Oracle's Fury", "Positive Attitude", "Rider Master", "Sanctuary", "Shadow", "Shield Master", "Sparkle Help", "Trap", "Weapon Master", "Web Trap", "Yellow Manacle"] }
+    ];
+
+    const cardData = cardGroups.flatMap(group => group.names.map(name => ({ ...group, name })));
+    const missionGrid = document.getElementById("mission-grid");
+    const cardGrid = document.getElementById("card-grid");
+    const fanGrid = document.getElementById("fan-grid");
+    const cardFilters = document.getElementById("card-filters");
+    let activeCardFilter = "all";
+    let fanPieces = [];
+
+    function escapeHtml(value) {
+      return value.replace(/[&<>'"]/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", "\"": "&quot;" })[character]);
+    }
+
+    function imagePath(folder, name) {
+      return "assets/card-illustrations/" + folder + "/" + encodeURIComponent(name) + ".png";
+    }
+
+    function renderMissions() {
+      missionGrid.replaceChildren(...missions.map(([number, title, copy, src]) => {
+        const card = document.createElement("article");
+        card.className = "mission-card";
+        const image = document.createElement("img");
+        image.loading = "lazy";
+        image.src = src;
+        image.alt = "Mission " + number + ": " + title;
+        const error = document.createElement("div");
+        error.className = "image-error";
+        error.textContent = "Artwork file not found — check the local assets folder.";
+        image.addEventListener("error", () => { error.style.display = "block"; });
+        const body = document.createElement("div");
+        body.className = "mission-card__body";
+        body.innerHTML = "<div class=\"mission-number\">Mission " + number + "</div><h3>" + title + "</h3><p>" + copy + "</p>";
+        card.append(image, error, body);
+        return card;
+      }));
+    }
+
+    function renderCardFilters() {
+      const filters = [{ key: "all", label: "All cards" }, ...cardGroups.map(({ key, label }) => ({ key, label }))];
+      cardFilters.replaceChildren(...filters.map(filter => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "filter" + (activeCardFilter === filter.key ? " active" : "");
+        button.textContent = filter.label;
+        button.addEventListener("click", () => { activeCardFilter = filter.key; renderCardFilters(); renderCards(); });
+        return button;
+      }));
+    }
+
+    function renderCards() {
+      const visibleCards = activeCardFilter === "all" ? cardData : cardData.filter(card => card.key === activeCardFilter);
+      cardGrid.replaceChildren(...visibleCards.map((card, index) => {
+        const cardEl = document.createElement("article");
+        cardEl.className = "battle-card " + card.key;
+        cardEl.innerHTML = "<div class=\"battle-card__crown\"><span class=\"card-category\">" + card.label + "</span></div><div class=\"battle-card__art\"><img loading=\"lazy\" alt=\"" + card.name + " illustration\" src=\"" + imagePath(card.folder, card.name) + "\"></div><h3>" + card.name + "</h3><div class=\"battle-card__rule\"></div><p class=\"battle-card__flavor\">A Flash-era collector frame for the original game illustration.</p><div class=\"card-footer\"><span>Arachna archive</span><span>" + String(index + 1).padStart(2, "0") + "</span></div>";
+        return cardEl;
+      }));
+    }
+
+    function renderFanWall() {
+      if (!fanPieces.length) {
+        fanGrid.innerHTML = "<div class=\"fan-empty\">No local fan art has been added in this session yet.</div>";
+        return;
+      }
+      fanGrid.replaceChildren(...fanPieces.map(piece => {
+        const el = document.createElement("article");
+        el.className = "fan-piece";
+        const title = escapeHtml(piece.title);
+        const artist = escapeHtml(piece.artist);
+        el.innerHTML = "<img alt=\"" + title + " by " + artist + "\" src=\"" + piece.url + "\"><div class=\"fan-piece__info\"><h3>" + title + "</h3><div class=\"fan-meta\">Fan art by " + artist + "</div></div>";
+        return el;
+      }));
+    }
+
+    document.querySelectorAll(".tab").forEach(button => button.addEventListener("click", () => {
+      const target = button.dataset.tab;
+      document.querySelectorAll(".tab").forEach(tab => tab.classList.toggle("active", tab === button));
+      document.querySelectorAll("[data-panel]").forEach(panel => panel.classList.toggle("active", panel.dataset.panel === target));
+    }));
+
+    document.getElementById("fan-form").addEventListener("submit", event => {
+      event.preventDefault();
+      const file = document.getElementById("fan-image").files[0];
+      const title = document.getElementById("fan-title").value.trim();
+      const artist = document.getElementById("fan-artist").value.trim();
+      if (!file || !title || !artist) return;
+      fanPieces.unshift({ url: URL.createObjectURL(file), title, artist });
+      event.currentTarget.reset();
+      document.getElementById("fan-note").classList.add("visible");
+      renderFanWall();
+    });
+
+    renderMissions();
+    renderCardFilters();
+    renderCards();
+    renderFanWall();
+  </script>
+</body>
+</html>

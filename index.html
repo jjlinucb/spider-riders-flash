@@ -365,6 +365,17 @@
     font-family: inherit;
     font-size: 11px;
   }
+
+  #archive-link {
+    color: #8fd8ff;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-align: center;
+  }
+
+  #archive-link:hover {
+    color: #ffffff;
+  }
 </style>
 </head>
 <body>
@@ -380,7 +391,7 @@
 <div id="mission-screen">
   <p>Choose a mission to start from.</p>
   <figure id="mission-preview">
-    <img id="mission-preview-image" src="assets/mission-01/to-enter-the-temple-card.png" width="640" height="480" alt="Mission artwork preview" />
+    <img id="mission-preview-image" src="assets/mission-01/to-enter-the-temple-hunter-card.png" width="640" height="480" alt="Mission artwork preview" />
     <figcaption id="mission-preview-title">Mission 1 — To Enter the Temple</figcaption>
   </figure>
   <div class="field-row">
@@ -392,6 +403,7 @@
     <input id="cheats-checkbox" type="checkbox" />
   </div>
   <button id="start-button" type="button">Start Game</button>
+  <a id="archive-link" href="arachna-archives.html">Open Arachna Archives &amp; Fan Gallery</a>
   <p id="bonus-note">
     Bonus Levels are unlocked in-game (Character Sheet &rarr; Bonus Levels)
     using these webcodes: Bonus 1 = <code>shadow</code>, Bonus 2 =
@@ -478,12 +490,12 @@
     // the launcher and never enter the original Flash/Ruffle module graph.
     const MISSION_ART = {
       "1":  { title: "Mission 1 — To Enter the Temple", src: "assets/mission-01/to-enter-the-temple-hunter-card.png", alt: "Hunter Steele approaches an ancient spider-marked temple." },
-      "2":  { title: "Mission 2 — The Oracle's Statue Chamber", src: "assets/mission-02/oracle-statue-chamber-card.png", alt: "A glowing oracle statue chamber and a floating battle card." },
-      "3":  { title: "Mission 3 — Find the Manacle", src: "assets/mission-03/find-the-manacle-card.png", alt: "A Spider Rider opens a luminous portal with an ancient manacle." },
-      "4":  { title: "Mission 4 — Find a Way Out of the Forest", src: "assets/mission-04/forest-exit-card.png", alt: "A rider and battle spider defend a forest village gate." },
-      "5":  { title: "Mission 5 — Bond with a Battle Spider", src: "assets/mission-05/bond-with-a-battle-spider-card.png", alt: "A Spider Rider forms a magical bond with a battle spider." },
-      "6":  { title: "Mission 6 — Free the Prisoners", src: "assets/mission-06/free-the-prisoners-card.png", alt: "A battle spider crosses a web bridge toward a cave prison rescue." },
-      "7":  { title: "Mission 7 — Save the Village", src: "assets/mission-07/save-the-village-card.png", alt: "A Spider Rider leads villagers across a bridge as a hostile web burns away." },
+      "2":  { title: "Mission 2 — The Oracle's Statue Chamber", src: "assets/mission-02/oracle-statue-chamber-hunter-card.png", alt: "Hunter discovers the Oracle's statue chamber and a glowing battle card." },
+      "3":  { title: "Mission 3 — Find the Manacle", src: "assets/mission-03/find-the-manacle-hunter-card.png", alt: "Hunter raises the Manacle before a portal into the Inner World." },
+      "4":  { title: "Mission 4 — Find a Way Out of the Forest", src: "assets/mission-04/forest-exit-hunter-card.png", alt: "Hunter navigates the Invectid-infested Forest of Bewilderment." },
+      "5":  { title: "Mission 5 — Bond with a Battle Spider", src: "assets/mission-05/bond-with-shadow-hunter-card.png", alt: "Hunter and Shadow form their first bond in the moonlit forest." },
+      "6":  { title: "Mission 6 — Free the Prisoners", src: "assets/mission-06/free-prisoners-hunter-shadow-card.png", alt: "Hunter and Shadow lead prisoners across a rescue web bridge." },
+      "7":  { title: "Mission 7 — Save the Village", src: "assets/mission-07/save-village-hunter-shadow-card.png", alt: "Hunter and Shadow break the Invectid web barrier to save the village." },
       "8":  { title: "Mission 8 — Join Corona in Arachna", src: "assets/mission-08/town-of-arachna-card.png", alt: "Corona leads riders into the lantern-lit Town of Arachna." },
       "9":  { title: "Mission 9 — Complete Spider Rider Training", src: "assets/mission-09/complete-spider-rider-training-hunter-igneous-card.png", alt: "Hunter Steele trains with Igneous in the Arachna arena." },
       "10": { title: "Mission 10 — Find the Spy", src: "assets/mission-10/find-the-spy-card.png", alt: "A rider investigates a rain-dark fortress corridor while a spy hides above." },
