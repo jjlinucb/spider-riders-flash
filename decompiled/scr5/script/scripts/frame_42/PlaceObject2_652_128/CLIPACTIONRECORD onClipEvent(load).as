@@ -11,14 +11,14 @@ onClipEvent(load){
          ennemyStats = new Object();
          ennemyStats.type = 403;
          ennemyStats.spider = null;
-         var _loc2_ = 2;
-         root.battleSystem.initBattle(ennemyStats,root.playerStats,_loc2_);
+         var _loc1_ = 2;
+         root.battleSystem.initBattle(ennemyStats,root.playerStats,_loc1_);
          game._visible = false;
          root.battleSystem.CallbackEndBattle = function(battleResult, ptsVictory)
          {
             game._visible = true;
             root.battleSystem.clearBattle();
-            var _loc1_;
+            var _loc3_;
             if(battleResult)
             {
                game.moveChar([game.getTileInfo(31,29)]);
@@ -29,13 +29,13 @@ onClipEvent(load){
                game.itemContainer.commander3._visible = false;
                game.itemContainer.champion4._visible = false;
                root.playerStats.victory += ptsVictory;
-               _loc1_ = function()
+               _loc3_ = function()
                {
                   root.textWindow.closeWindow();
                   root.sfx.gotoAndPlay("winner");
                   root.gotoAndStop("level6");
                };
-               root.textWindow.drawWindow([root.getInsName("txtM5Z8_p1",root.parseKitMissions)],10,_loc1_);
+               root.textWindow.drawWindow([root.getInsName("txtM5Z8_p1",root.parseKitMissions)],10,_loc3_);
                game.unregisterDropZone(game.zoneInvectid2);
                game.removeObject("spiderItem");
             }
@@ -56,8 +56,8 @@ onClipEvent(load){
       };
       root.textWindow.drawWindow([root.getInsName("txtM5Z8_p2",root.parseKitMissions),root.getInsName("txtM5Z8_p3",root.parseKitMissions)],10,endFct1);
    };
-   if(root.sprAccess)
+   if(game.battleBoss < 1 && (root.sprAccess || game.spider >= 1))
    {
-      game.registerWalkZone(game.zoneInvectid2);
+      game.registerWalkZone(this);
    }
 }

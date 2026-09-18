@@ -17,7 +17,7 @@ onClipEvent(load){
       };
       root.textWindow.drawWindow([root.getInsName("txtM5Z7_p1",root.parseKitMissions)],10,endFct);
    };
-   if(game.battleBoss < 1)
+   if(game.battleBoss < 1 && !(root.sprAccess || game.spider >= 1))
    {
       game.registerWalkZone(this);
    }

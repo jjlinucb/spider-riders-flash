@@ -348,6 +348,61 @@
     text-align: right;
   }
 
+  /* Music / sound-effects mixer. Two independent levels, because the SWF now
+     plays its music on a duplicate of the `sfx` clip with its own Sound
+     object (see README) - one slider per channel. */
+  #mix-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+    background: #1c1c20;
+    border: 1px solid #3a3a40;
+    border-radius: 2px;
+    padding: 6px 10px;
+  }
+
+  .mix-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: #c9c7c0;
+  }
+
+  .mix-row label {
+    width: 58px;
+    text-align: right;
+    letter-spacing: 0.02em;
+  }
+
+  .mix-row input[type="range"] {
+    width: 104px;
+    accent-color: #4c9a5e;
+  }
+
+  .mix-row output {
+    width: 28px;
+    text-align: right;
+    color: #7a7d82;
+    font-variant-numeric: tabular-nums;
+  }
+
+  #mix-apply {
+    background: #2f6f3e;
+    color: #e8e6df;
+    border: 1px solid #4c9a5e;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-family: inherit;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+
+  #mix-apply.hidden {
+    display: none;
+  }
+
   #bonus-note {
     margin: 0;
     font-size: 11px;
@@ -410,6 +465,19 @@
 <div id="speed-toggle-bar">
   <button id="speed-toggle-button" type="button">2x Speed: Off</button>
   <button id="autobattle-toggle-button" type="button">Auto-battle: Off</button>
+  <div id="mix-controls">
+    <div class="mix-row">
+      <label for="music-volume">Music</label>
+      <input id="music-volume" type="range" min="0" max="100" step="5" value="100" />
+      <output id="music-volume-value">100</output>
+    </div>
+    <div class="mix-row">
+      <label for="effect-volume">Sound FX</label>
+      <input id="effect-volume" type="range" min="0" max="100" step="5" value="100" />
+      <output id="effect-volume-value">100</output>
+    </div>
+    <button id="mix-apply" class="hidden" type="button">Apply (restarts mission)</button>
+  </div>
   <span id="speed-toggle-note"></span>
 </div>
 
@@ -468,6 +536,39 @@
     const speedToggleButtonEl = document.getElementById("speed-toggle-button");
     const speedToggleNoteEl = document.getElementById("speed-toggle-note");
     const autoBattleToggleButtonEl = document.getElementById("autobattle-toggle-button");
+    const musicVolumeEl = document.getElementById("music-volume");
+    const effectVolumeEl = document.getElementById("effect-volume");
+    const musicVolumeValueEl = document.getElementById("music-volume-value");
+    const effectVolumeValueEl = document.getElementById("effect-volume-value");
+    const mixApplyEl = document.getElementById("mix-apply");
+
+    // Music and sound effects are two separate levels inside the SWF (0-100
+    // each, applied on top of the in-game speaker icon's master volume).
+    // They can only be handed to the player as FlashVars at build time: this
+    // SWF is version 6, and Flash's ExternalInterface is an SWF 8+ API, so
+    // Ruffle exposes no `flash.external.ExternalInterface` to it (verified -
+    // `_global.flash` is undefined in AVM1 here) and there is no other
+    // JS->SWF channel. Bumping the SWF version to 8 would fix that and break
+    // the game: SWF 7+ makes ActionScript identifiers case-sensitive, and
+    // this codebase leans on the old case-insensitive behaviour in places
+    // (`loadMc.mission` vs `loadMC.gils` in the same function). So a change
+    // made mid-game shows an Apply button that rebuilds the player, the same
+    // story as the two toggles above.
+    const MIX_STORAGE_KEY = "spiderRidersMix";
+    let musicMix = 100;
+    let effectMix = 100;
+    let runningMusicMix = null;
+    let runningEffectMix = null;
+
+    try {
+      const saved = JSON.parse(localStorage.getItem(MIX_STORAGE_KEY) || "null");
+      if (saved && typeof saved === "object") {
+        if (Number.isFinite(saved.music)) musicMix = Math.max(0, Math.min(100, saved.music));
+        if (Number.isFinite(saved.effect)) effectMix = Math.max(0, Math.min(100, saved.effect));
+      }
+    } catch (e) {
+      // Private browsing / blocked storage - defaults are fine.
+    }
 
     // Same rebuild-on-toggle story as `speedDoubled` below - there's no
     // ExternalInterface in this SWF for JS to poke a running instance's
@@ -608,6 +709,8 @@
               startMission: chosenMission,
               autoBattle: chosenAutoBattle,
               cheatsEnabled: chosenCheats,
+              musicVolume: String(musicMix),
+              effectVolume: String(effectMix),
               ...(chosenCamp ? { startCamp: chosenCamp } : {}),
               ...(chosenBossFlashVar ? { [chosenBossFlashVar]: "1" } : {}),
             },
@@ -654,6 +757,9 @@
             // control still work exactly as before, just scaled down from
             // this lower starting ceiling instead of from silence.
             player.volume = 0.15;
+            runningMusicMix = musicMix;
+            runningEffectMix = effectMix;
+            updateMixUi();
             setStatus("");
           })
           .catch((e) => {
@@ -712,6 +818,44 @@
       launchPlayer();
       setTimeout(() => { speedToggleNoteEl.textContent = ""; }, 4000);
     });
+
+    const updateMixUi = () => {
+      musicVolumeEl.value = String(musicMix);
+      effectVolumeEl.value = String(effectMix);
+      musicVolumeValueEl.textContent = String(musicMix);
+      effectVolumeValueEl.textContent = String(effectMix);
+      // Only worth offering a restart when a player is actually running with
+      // different levels than the sliders now show.
+      const stale = currentPlayerEl !== null &&
+        (runningMusicMix !== musicMix || runningEffectMix !== effectMix);
+      mixApplyEl.classList.toggle("hidden", !stale);
+    };
+
+    const saveMix = () => {
+      try {
+        localStorage.setItem(MIX_STORAGE_KEY, JSON.stringify({ music: musicMix, effect: effectMix }));
+      } catch (e) {
+        // Storage blocked - the levels still apply to this session.
+      }
+    };
+
+    const onMixInput = () => {
+      musicMix = Number(musicVolumeEl.value);
+      effectMix = Number(effectVolumeEl.value);
+      saveMix();
+      updateMixUi();
+    };
+
+    musicVolumeEl.addEventListener("input", onMixInput);
+    effectVolumeEl.addEventListener("input", onMixInput);
+
+    mixApplyEl.addEventListener("click", () => {
+      speedToggleNoteEl.textContent = "Reloading - this restarts the current mission from scratch…";
+      launchPlayer();
+      setTimeout(() => { speedToggleNoteEl.textContent = ""; }, 4000);
+    });
+
+    updateMixUi();
   });
 </script>
 <script src="ruffle-vendor/ruffle.js"></script>

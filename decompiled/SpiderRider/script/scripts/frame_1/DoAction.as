@@ -1,12 +1,75 @@
 function setNewVolume(newV, mute)
 {
-   var _loc1_ = mute;
-   mainMute = _loc1_;
-   if(!_loc1_)
+   var _loc3_ = mute;
+   mainMute = _loc3_;
+   if(!_loc3_)
    {
       currentV = newV;
    }
-   sVol.setVolume(!_loc1_ ? newV : 0);
+   sVol.setVolume(!_loc3_ ? newV : 0);
+   applyMixVolumes();
+}
+function applyMixVolumes()
+{
+   var _loc1_ = !mainMute ? currentV : 0;
+   if(musicSound != undefined)
+   {
+      musicSound.setVolume(Math.round(_loc1_ * musicMix / 100));
+   }
+   if(effectSound != undefined)
+   {
+      effectSound.setVolume(Math.round(_loc1_ * effectMix / 100));
+   }
+}
+function clampMix(v, dflt)
+{
+   if(v == undefined || v == "" || isNaN(Number(v)))
+   {
+      return dflt;
+   }
+   return Math.max(0,Math.min(100,Math.round(Number(v))));
+}
+function setMixLevels(newMusic, newEffect)
+{
+   musicMix = clampMix(newMusic,musicMix);
+   effectMix = clampMix(newEffect,effectMix);
+   applyMixVolumes();
+   return musicMix + "," + effectMix;
+}
+function playSfx(lbl)
+{
+   var _loc2_ = lbl;
+   if(!musicLabels[_loc2_] && sfxFx != undefined)
+   {
+      MovieClip.prototype.gotoAndPlay.call(sfxFx,_loc2_);
+   }
+   else
+   {
+      MovieClip.prototype.gotoAndPlay.call(sfx,_loc2_);
+   }
+}
+function initSoundMix()
+{
+   if(sfx == undefined)
+   {
+      return undefined;
+   }
+   if(sfxFx == undefined)
+   {
+      attachMovie("sfxClip","sfxFx",60000);
+      if(sfxFx == undefined)
+      {
+         return undefined;
+      }
+      MovieClip.prototype.gotoAndStop.call(sfxFx,1);
+   }
+   musicSound = new Sound(sfx);
+   effectSound = new Sound(sfxFx);
+   sfx.gotoAndPlay = function(lbl)
+   {
+      root.playSfx(lbl);
+   };
+   applyMixVolumes();
 }
 _global.root = this;
 _focusrect = false;
@@ -86,6 +149,9 @@ inWorld = undefined;
 inCamp = false;
 _quality = "MEDIUM";
 sVol = new Sound();
+musicMix = clampMix(musicVolume,100);
+effectMix = clampMix(effectVolume,100);
+musicLabels = {theme:1,music1:1,music2:1,music3:1,area1:1,area2:1,area3:1,area4:1,area5:1,area6:1,battleMonster:1,battleInvectid:1,battleRider:1,battleSystem:1,winner:1,stopAllMusic:1};
 trace("GAMEDEBUG = " + GAMEDEBUG);
 if(!GAMEDEBUG)
 {

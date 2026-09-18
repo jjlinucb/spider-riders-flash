@@ -4,20 +4,20 @@ onClipEvent(load){
    newObj.fct = function()
    {
       game.spider = 1;
+      game.text7 = 1;
       game.itemContainer.spiderField1._visible = false;
       game.addObject("spiderItem");
       root.sfx.gotoAndPlay("useObj");
+      root.playerStats.spider = root.spiderData;
+      root.sprSex = 1;
+      root.sprName = "";
+      root.sproffSet = 0;
+      root.sprHead = 1;
+      root.sprBody = 1;
+      root.sprLegs = 1;
+      root.sprAccess = true;
       endFct = function()
       {
-         game.text7 = 1;
-         root.playerStats.spider = root.spiderData;
-         root.sprSex = 1;
-         root.sprName = "";
-         root.sproffSet = 0;
-         root.sprHead = 1;
-         root.sprBody = 1;
-         root.sprLegs = 1;
-         root.sprAccess = true;
          root.textWindow.closeWindow();
          root.charWindow.drawWindow2();
          delete endFct;

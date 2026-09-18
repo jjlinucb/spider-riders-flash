@@ -1256,6 +1256,92 @@ what was found and why each call was made:
   it depends on systems that were built assuming a live server and were never
   designed to run offline.
 
+- **Mission 5 boss unreachable after bonding with the spider** (reported in the
+  fan Discord's #flash-riders: "it wont let me fight the boss on mission 5 even
+  after getting my spider"). Mission 5's last screen (`decompiled/scr5/.../frame_42/`)
+  holds two invisible zones on top of the Invectid camp. `zoneInvectid1` is the
+  line of soldiers that taunts you and shoves you back (`txtM5Z7_p1`, *"Poor
+  fool! Go tell your people this forest now belongs to us."*), registered
+  whenever `game.battleBoss < 1`. `zoneInvectid2` is the Invectid Champion
+  fight, and the original registers it *only* `if(root.sprAccess)`, once, when
+  the screen loads.
+
+  `root.sprAccess` is set in exactly one place in normal play, and it isn't the
+  spider pickup itself: the pickup handler (`frame_12/PlaceObject2_598_124`,
+  the manacle drop-zone on the spider field) sets `game.spider = 1` and adds
+  the `spiderItem` to the inventory, then defers *every* rider-state flag —
+  `playerStats.spider`, the `spr*` cosmetics and `sprAccess` — into `endFct`,
+  the callback the text window fires when you click through the "I hear the
+  Oracle's voice" dialog. Anything that loses that callback leaves you holding
+  the spider with `sprAccess` still false, and from there the champion's zone
+  is never registered on any later visit: the only thing left in that room is
+  the "Poor fool!" bounce, forever. The same screen also keeps its "Move along.
+  I don't want to talk to you" greeting zone armed until `game.text7` is set —
+  which also only happened inside that callback — and a greeting firing
+  mid-hand-off is exactly the interleaving that produced the mission-5 woodsman
+  loop fixed earlier in this file (`drawWindow` keeps a single shared `fct` on
+  the text window, so the last caller wins).
+
+  Three changes, all in `scr5_2.swf`:
+  - the pickup sets `game.spider`, `game.text7`, `playerStats.spider`, the
+    cosmetics and `sprAccess` in the handler itself; `endFct` now only closes
+    the text window and opens the spider-customization window, so the flags no
+    longer depend on the dialog callback arriving;
+  - the champion zone registers on `game.battleBoss < 1 && (root.sprAccess ||
+    game.spider >= 1)` (and re-arms itself by `this` rather than by name), so
+    carrying the spider is enough on its own;
+  - the taunting soldiers only block while you have *no* spider
+    (`!(root.sprAccess || game.spider >= 1)`), which is what the story says
+    anyway and removes the "bounced back forever" state entirely.
+
+  Verified in Ruffle end to end: with a spider in hand, walking into the camp
+  now opens the Commander's "You don't look like the Turandots, do you?" and
+  drops straight into the Champion battle.
+
+- **Separate music and sound-effect volume** (asked for in #flash-riders:
+  "suppose we get the option of changing the volume of the music and sound
+  effects"). Haon115's read was right — the original has one master level
+  (`sVol = new Sound()` with no target, `frame_1/DoAction.as`) and every sound
+  in the game, music and effects alike, is a `StartSound` tag on one clip
+  (`root.sfx`, character 75, 39 frame labels; `root.sfx.gotoAndPlay("music2")`,
+  `...("clic")` and so on from ~130 call sites across the shell *and* every
+  mission SWF).
+
+  Splitting them without touching those call sites: `frame_4` (the earliest
+  frame where `sfx` exists) now creates a second, real instance of that same
+  clip and gives each one its own `Sound` object — `musicSound = new Sound(sfx)`,
+  `effectSound = new Sound(sfxFx)` — then overrides `sfx.gotoAndPlay` on the
+  instance to route by label: the 16 music labels (`theme`, `music1`-`3`,
+  `area1`-`6`, `battleMonster`/`battleInvectid`/`battleRider`, `battleSystem`,
+  `winner`, `stopAllMusic`) stay on the original clip, everything else plays on
+  the second one. Both levels are percentages applied on top of the in-game
+  speaker icon's master volume, so that control still does what it always did.
+
+  Two Ruffle-specific details cost most of the work here, both measured rather
+  than guessed (hooking `AnalyserNode` onto Ruffle's WebAudio output and
+  reading RMS while flipping the levels):
+  - `duplicateMovieClip` produces a clip whose timeline `StartSound` tags never
+    fire — the duplicate is silent. `attachMovie` from a linkage name works, so
+    the SWF gets one added `ExportAssets` tag (character 75 → `"sfxClip"`,
+    inserted by `Tools/add_export.py`; the file already uses `ExportAssets`
+    elsewhere for `axeItem`, `rope`, …).
+  - a music label's `StartSound` stop-tags do *not* stop that sound when it is
+    playing on a different clip, so the boot theme has to keep playing on the
+    clip that started it. Hence music on the original and effects on the copy,
+    not the other way round.
+
+  The two sliders live in `index.html`'s top-right bar, persist to
+  `localStorage`, and are handed to the player as the `musicVolume` /
+  `effectVolume` FlashVars. They apply at launch; changing them mid-game shows
+  an Apply button that rebuilds the player, the same story as the 2x Speed and
+  Auto-battle toggles. There is no live JS→SWF channel available: this SWF is
+  version 6 and `ExternalInterface` is an SWF 8+ API, so Ruffle exposes no
+  `flash.external.ExternalInterface` to it (`_global.flash` is `undefined` in
+  AVM1 here — verified with a trace). Bumping the SWF version to 8 would fix
+  that and break the game, since SWF 7+ makes ActionScript identifiers
+  case-sensitive and this codebase leans on the old behaviour in places
+  (`loadMc.mission` and `loadMC.gils` in the same function).
+
 ## Running locally
 
 Browsers block WASM/fetch on `file://`, so this needs a static server, not just
@@ -1288,8 +1374,10 @@ python3 -m http.server 8000
 
 ## Known issues
 
-- **Audio**: not verified either way — nobody's confirmed whether music/sound
-  effects actually play through Ruffle yet.
+- **Audio**: music and effects both play under Ruffle, and each has its own
+  level (see the mixer entry above; verified by measuring Ruffle's WebAudio
+  output at 0/100 on each channel). The levels only apply when the player is
+  built, so changing them mid-game restarts the current mission.
 
 ## Contributing
 
